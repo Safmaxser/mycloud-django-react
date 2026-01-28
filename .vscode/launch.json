@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+
+    {
+      "name": "Python Debugger: Django",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/backend/manage.py",
+      "args": [
+        "runserver",
+        "7070"
+      ],
+      "django": true,
+      "autoStartBrowser": false,
+      "envFile": "${workspaceFolder}/.env",
+      "justMyCode": true
+    }
+  ]
+}

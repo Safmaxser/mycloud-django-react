@@ -1,0 +1,45 @@
+# --- System and IDE ---
+.git/
+.gitignore
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.log
+
+# --- Secrets ---
+.env
+.env.*
+!.env.example
+
+# --- Backend (Django / Python / uv) ---
+backend/.venv/
+backend/venv/
+backend/env/
+backend/.uv/
+backend/**/__pycache__/
+backend/**/*.py[cod]
+backend/db.sqlite3
+backend/db.sqlite3-journal
+
+# --- Data files ---
+backend/protected_media/
+backend/media/
+backend/staticfiles/
+backend/static_root/
+
+# --- Frontend (React / TypeScript / Yarn) ---
+frontend/node_modules/
+frontend/.yarn/
+frontend/.pnp.*
+frontend/dist/
+frontend/build/
+frontend/yarn-error.log
+frontend/npm-debug.log*
+
+# --- Development tools cache ---
+backend/.pytest_cache/
+backend/.ruff_cache/
+backend/.mypy_cache/
+frontend/.eslintcache
