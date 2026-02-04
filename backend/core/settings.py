@@ -28,7 +28,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'django_filters',
     'corsheaders',
+    'storage',
+    'users',
 ]
 
 if DEBUG:
@@ -44,6 +47,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.EventLoggingMiddleware',
 ]
 
 if DEBUG:
@@ -69,6 +73,24 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
     ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'SEARCH_PARAM': 'q',
+    'ORDERING_PARAM': 'o',
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '500/hour',
+        'user': '2000/hour',
+    },
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 }
 
 TEMPLATES = [
@@ -91,10 +113,54 @@ DATABASES = {'default': env.db_url('DATABASE_URL')}
 VAL_PATH = 'django.contrib.auth.password_validation'
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': f'{VAL_PATH}.UserAttributeSimilarityValidator'},
-    {'NAME': f'{VAL_PATH}.MinimumLengthValidator'},
+    {
+        'NAME': f'{VAL_PATH}.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 6,
+        },
+    },
     {'NAME': f'{VAL_PATH}.CommonPasswordValidator'},
     {'NAME': f'{VAL_PATH}.NumericPasswordValidator'},
+    {'NAME': 'core.validators.ComplexPasswordValidator'},
 ]
+ACCOUNT_UNIQUE_EMAIL = True
+AUTH_USER_MODEL = 'users.User'
+
+LOG_LEVEL = 'DEBUG' if DEBUG else 'ERROR'
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{levelname}] {asctime} {name}.{module}: {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO' if DEBUG else 'ERROR',
+            'propagate': True,
+        },
+        'storage': {
+            'handlers': ['console'],
+            'level': LOG_LEVEL,
+            'propagate': True,
+        },
+        'users': {
+            'handlers': ['console'],
+            'level': LOG_LEVEL,
+            'propagate': True,
+        },
+    },
+}
 
 WSGI_APPLICATION = 'core.wsgi.application'
 

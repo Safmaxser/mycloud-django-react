@@ -1,0 +1,19 @@
+[run]
+source = .
+omit =
+    manage.py
+    core/asgi.py
+    core/wsgi.py
+    core/urls.py
+    */admin.py
+    */migrations/*
+    tests/*
+    */tests.py
+
+[report]
+skip_empty = True
+show_missing = True
+exclude_lines =
+    pragma: no cover
+    def __str__
+    if TYPE_CHECKING:

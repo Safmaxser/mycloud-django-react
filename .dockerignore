@@ -1,45 +1,52 @@
 # --- System and IDE ---
-.git/
-.gitignore
-.vscode/
-.idea/
-.DS_Store
+**/.git
+**/.gitignore
+**/.vscode
+**/.idea
+**/.DS_Store
 Thumbs.db
 *.swp
 *.log
 
+# --- Docker ---
+docker-compose.override.yml
+docker-compose.override.example.yml
+
 # --- Secrets ---
-.env
-.env.*
+**/.env
+**/.env.*
 !.env.example
 
 # --- Backend (Django / Python / uv) ---
-backend/.venv/
-backend/venv/
-backend/env/
-backend/.uv/
-backend/**/__pycache__/
-backend/**/*.py[cod]
-backend/db.sqlite3
-backend/db.sqlite3-journal
+**/__pycache__/
+**/*.py[cod]
+**/.venv/
+**/venv/
+**/env/
+**/.uv/
+**/db.sqlite3
+**/db.sqlite3-journal
 
-# --- Data files ---
-backend/protected_media/
-backend/media/
-backend/staticfiles/
-backend/static_root/
+# --- Media and Static ---
+**/media/
+**/protected_media/
+**/protected/
+**/staticfiles/
+**/static_root/
 
 # --- Frontend (React / TypeScript / Yarn) ---
-frontend/node_modules/
-frontend/.yarn/
-frontend/.pnp.*
-frontend/dist/
-frontend/build/
-frontend/yarn-error.log
-frontend/npm-debug.log*
+**/node_modules/
+**/dist/
+**/build/
+**/.eslintcache
+**/npm-debug.log*
+**/yarn-error.log
+**/.yarn/
+**/.pnp.*
 
 # --- Development tools cache ---
-backend/.pytest_cache/
-backend/.ruff_cache/
-backend/.mypy_cache/
-frontend/.eslintcache
+**/.pytest_cache/
+**/.ruff_cache/
+**/.mypy_cache/
+**/.coverage
+**/htmlcov/

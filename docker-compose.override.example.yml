@@ -1,0 +1,15 @@
+services:
+  backend:
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - /app/.venv
+      - ./backend/protected_media:/app/protected_media
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+
+  frontend:
+    volumes:
+      - ./backend/protected_media:/usr/share/nginx/html/protected:ro
