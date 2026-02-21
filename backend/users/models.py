@@ -4,6 +4,7 @@ import uuid
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, UserManager
+from django.contrib.auth.password_validation import validate_password
 from django.core.validators import EmailValidator, RegexValidator
 from django.db import models
 from django.db.models.signals import post_delete
@@ -32,6 +33,7 @@ class User(AbstractUser):
         editable=False,
         verbose_name='ID пользователя',
     )
+    password = models.CharField(max_length=128, validators=[validate_password])
     username = models.CharField(
         max_length=20, unique=True, validators=[username_regex], verbose_name='Логин'
     )

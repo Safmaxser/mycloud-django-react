@@ -16,6 +16,7 @@
     "*.env.example": "dotenv",
     "*.env.local": "dotenv"
   },
+  // --- Python & Ruff ---
   "[python]": {
     "editor.tabSize": 4,
     "editor.defaultFormatter": "charliermarsh.ruff",
@@ -23,30 +24,6 @@
       "source.fixAll.ruff": "always",
       "source.organizeImports.ruff": "always"
     }
-  },
-  "[json]": {
-    "editor.tabSize": 2,
-    "editor.defaultFormatter": "vscode.json-language-features"
-  },
-  "[jsonc]": {
-    "editor.tabSize": 2,
-    "editor.defaultFormatter": "vscode.json-language-features"
-  },
-  "[nginx]": {
-    "editor.tabSize": 4,
-    "editor.insertSpaces": true
-  },
-  "[javascript]": {
-    "editor.tabSize": 2
-  },
-  "[javascriptreact]": {
-    "editor.tabSize": 2
-  },
-  "[typescript]": {
-    "editor.tabSize": 2
-  },
-  "[typescriptreact]": {
-    "editor.tabSize": 2
   },
   "ruff.configuration": {
     "format": {
@@ -59,5 +36,47 @@
         "I"
       ]
     }
-  }
+  },
+  // --- Frontend (JS/TS) & Prettier ---
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "prettier.singleQuote": true,
+  "prettier.trailingComma": "all",
+  "prettier.semi": true,
+  "prettier.printWidth": 100,
+  "[typescript]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  // --- Other ---
+  "[json]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[jsonc]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[nginx]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true
+  },
+  "prettier.documentSelectors": [
+    "**/*.tsx",
+    "**/*.ts"
+  ],
+  "prettier.configPath": "frontend/.prettierrc",
+  "prettier.requireConfig": true,
+  "prettier.resolveConfigRelativeToRoot": true
 }

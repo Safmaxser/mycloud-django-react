@@ -1,10 +1,8 @@
 from typing import TYPE_CHECKING, cast
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.password_validation import validate_password
-from django.db.models import Sum
 from rest_framework import serializers
-from storage.utils import format_bytes
 
 if TYPE_CHECKING:
     from .models import User
@@ -12,83 +10,59 @@ if TYPE_CHECKING:
 UserModel = get_user_model()
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserBaseSerializer(serializers.ModelSerializer):
     """
-    Сериализатор для работы с пользователями: преобразует данные из БД в JSON и обратно.
+    Базовый сериализатор со всеми методами подсчета файлов и квот
+    (без password и без is_staff).
     """
 
-    password = serializers.CharField(
-        write_only=True, required=True, style={'input_type': 'password'}
-    )
-    files_count = serializers.SerializerMethodField()
-    files_total_size = serializers.SerializerMethodField()
-    files_total_size_human = serializers.SerializerMethodField()
+    files_count = serializers.IntegerField(read_only=True)
+    files_total_size = serializers.IntegerField(read_only=True)
+    storage_quota = serializers.SerializerMethodField()
+    max_file_size = serializers.SerializerMethodField()
 
     class Meta:
         model = UserModel
         fields = (
             'id',
             'username',
-            'password',
             'email',
             'full_name',
-            'storage_path',
-            'is_staff',
             'date_joined',
             'updated_at',
             'files_count',
             'files_total_size',
-            'files_total_size_human',
+            'storage_quota',
+            'max_file_size',
         )
         read_only_fields = (
             'id',
-            'storage_path',
             'date_joined',
             'updated_at',
-            'files_count',
-            'files_total_size',
-            'files_total_size_human',
         )
 
-    def get_files_count(self, obj) -> int:
+    def get_storage_quota(self, obj) -> int:
         """
-        Возвращает общее количество файлов в хранилище пользователя.
+        Возвращает общий лимит хранилища из настроек.
         """
-        return obj.files.count()
+        return settings.STORAGE_QUOTA_BYTES
 
-    def get_files_total_size(self, obj) -> int:
+    def get_max_file_size(self, obj) -> int:
         """
-        Вычисляет суммарный объем всех файлов пользователя в байтах.
-        Используется для числовой сортировки на фронтенде.
+        Возвращает лимит на один файл из настроек.
         """
-        return obj.files.aggregate(Sum('size'))['size__sum'] or 0
+        return settings.MAX_FILE_SIZE_BYTES
 
-    def get_files_total_size_human(self, obj) -> str:
-        """
-        Преобразует суммарный объем файлов в человекочитаемый формат (КБ, МБ, ГБ).
-        """
-        total = self.get_files_total_size(obj)
-        return format_bytes(total)
 
-    def validate_password(self, value: str) -> str:
-        """
-        Валидация пароля на соответствие требованиям сложности.
-        Использует стандартные валидаторы Django из settings.py.
-        """
-        validate_password(value)
-        return value
+class UserRegistrationSerializer(UserBaseSerializer):
+    """
+    Сериализатор для регистрации пользователей (пароль обязателен).
+    """
 
-    def validate_is_staff(self, value: bool) -> bool:
-        """
-        Проверяем, имеет ли право текущий пользователь менять статус админа.
-        """
-        request = self.context.get('request')
-        if value is True:
-            if not request or not request.user.is_staff:
-                raise serializers.ValidationError(
-                    'У вас недостаточно прав для назначения статуса администратора.'
-                )
-        return value
+    password = serializers.CharField(write_only=True, required=True)
+
+    class Meta(UserBaseSerializer.Meta):
+        fields = UserBaseSerializer.Meta.fields + ('password',)
 
     def create(self, validated_data: dict) -> 'User':
         """
@@ -104,15 +78,57 @@ class UserSerializer(serializers.ModelSerializer):
         )
         return cast('User', user)
 
+
+class UserDetailSerializer(UserBaseSerializer):
+    """
+    Сериализатор для детального отображения данных пользователя
+    и безопасного редактирования профилей администратором.
+    """
+
+    is_staff = serializers.BooleanField(required=False)
+
+    class Meta(UserBaseSerializer.Meta):
+        fields = UserBaseSerializer.Meta.fields + ('is_staff',)
+
+    def validate_is_staff(self, value: bool) -> bool:
+        """
+        Проверяем, имеет ли право текущий пользователь менять статус админа.
+        """
+        request = self.context.get('request')
+        if not request or not request.user.is_staff:
+            raise serializers.ValidationError(
+                'Только администратор может изменять статус доступа.'
+            )
+        if self.instance and self.instance.is_staff != value:
+            if self.instance.pk == request.user.pk and value is False:
+                raise serializers.ValidationError(
+                    'Вы не можете лишить себя прав администратора.'
+                )
+        return value
+
+
+class UserMeSerializer(UserBaseSerializer):
+    """
+    Сериализатор для работы со своим профилем.
+    """
+
+    password = serializers.CharField(write_only=True, required=False)
+    is_staff = serializers.BooleanField(read_only=True)
+
+    class Meta(UserBaseSerializer.Meta):
+        fields = UserBaseSerializer.Meta.fields + (
+            'password',
+            'is_staff',
+        )
+
     def update(self, instance: 'User', validated_data: dict) -> 'User':
         """
         Обновляет данные пользователя. Если передан пароль,
         он хешируется перед сохранением.
         """
         password = validated_data.pop('password', None)
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
+        instance = super().update(instance, validated_data)
         if password:
             instance.set_password(password)
-        instance.save()
+            instance.save()
         return instance

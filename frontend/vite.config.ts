@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
@@ -7,9 +7,28 @@ export default defineConfig({
     host: true,
     port: 5173,
     proxy: {
-      '/api': 'http://localhost:8000',
-      '/admin': 'http://localhost:8000',
-      '/static': 'http://localhost:8000',
-    }
-  }
-})
+      '/api/': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/admin/': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      '/static/': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      '/protected_media/': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+    },
+  },
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: true,
+  },
+});

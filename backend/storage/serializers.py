@@ -1,17 +1,17 @@
-from django.core.files.uploadedfile import UploadedFile
+from django.conf import settings
+from django.db.models import Sum
 from rest_framework import serializers
 
 from .models import File
-from .utils import format_bytes
 
 
 class FileSerializer(serializers.ModelSerializer):
     """
-    Сериализатор для работы с файлами: преобразует данные из БД в JSON и обратно.
+    Сериализатор для работы с файловыми объектами хранилища.
     """
 
+    file = serializers.FileField(allow_empty_file=True)
     owner_username = serializers.ReadOnlyField(source='owner.username')
-    size_human = serializers.SerializerMethodField()
 
     class Meta:
         model = File
@@ -20,7 +20,6 @@ class FileSerializer(serializers.ModelSerializer):
             'file',
             'original_name',
             'size',
-            'size_human',
             'comment',
             'special_link_token',
             'mimetype',
@@ -34,21 +33,13 @@ class FileSerializer(serializers.ModelSerializer):
         read_only_fields = (
             'id',
             'size',
-            'size_human',
             'special_link_token',
             'mimetype',
-            'owner_username',
             'download_count',
             'last_download_at',
             'created_at',
             'updated_at',
         )
-
-    def get_size_human(self, obj: 'File') -> str:
-        """
-        Конвертирует байты в читаемый формат (КБ, МБ, ГБ).
-        """
-        return format_bytes(obj.size)
 
     def validate_original_name(self, value: str) -> str:
         """
@@ -58,11 +49,27 @@ class FileSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Имя файла не может быть пустым.')
         return value
 
-    def validate_file(self, value: UploadedFile) -> UploadedFile:
+    def validate_file(self, value):
         """
-        Проверка: размер загружаемого файла не должен превышать 500 МБ.
+        Комплексная проверка: лимит одного файла + лимит всего хранилища.
         """
-        limit = 500 * 1024 * 1024
-        if value.size > limit:
-            raise serializers.ValidationError('Файл слишком большой (макс. 500 МБ).')
+        user = self.context['request'].user
+        if value.size > settings.MAX_FILE_SIZE_BYTES:
+            limit_mb = settings.MAX_FILE_SIZE_BYTES // (1024 * 1024)
+            raise serializers.ValidationError(
+                f'Файл слишком большой. Максимум для одного файла: {limit_mb} МБ.'
+            )
+        current_usage = (
+            File.objects.filter(owner=user).aggregate(total=Sum('size'))['total'] or 0
+        )
+        if current_usage + value.size > settings.STORAGE_QUOTA_BYTES:
+            free_space_mb = (settings.STORAGE_QUOTA_BYTES - current_usage) // (
+                1024 * 1024
+            )
+            if free_space_mb < 1:
+                free_space_kb = (settings.STORAGE_QUOTA_BYTES - current_usage) // 1024
+                error_msg = f'Недостаточно места. Доступно: {free_space_kb} КБ.'
+            else:
+                error_msg = f'Недостаточно места. Доступно: {free_space_mb} МБ.'
+            raise serializers.ValidationError(error_msg)
         return value

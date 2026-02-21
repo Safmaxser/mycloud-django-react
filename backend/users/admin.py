@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.db.models import Sum
+
 from storage.utils import format_bytes
 
 from .models import User

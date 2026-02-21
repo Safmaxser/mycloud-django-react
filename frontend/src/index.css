@@ -1,68 +1,149 @@
+@import 'tailwindcss';
+
+/*
+ * Базовые настройки типографики и адаптивный масштаб (Responsive Root Font Size).
+ * Обеспечивает пропорциональное изменение интерфейса на разных разрешениях.
+ */
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-size: 16px;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
+@media (min-width: 1920px) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    font-size: 18px;
   }
-  a:hover {
-    color: #747bff;
+}
+@media (max-width: 1440px) {
+  :root {
+    font-size: 15px;
   }
-  button {
-    background-color: #f9f9f9;
+}
+@media (max-width: 1024px) {
+  :root {
+    font-size: 13px;
+  }
+}
+@media (max-width: 768px) {
+  :root {
+    font-size: 12px;
+  }
+}
+
+/*
+ * Дизайн-система компонентов (UI Kit).
+ * Содержит переиспользуемые классы для кнопок, таблиц и навигации.
+ */
+@layer components {
+  /* Базовый стиль кнопок */
+  .btn-standard {
+    @apply flex items-center justify-center gap-2 font-bold text-white transition-all enabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-30 disabled:shadow-none;
+  }
+
+  .btn-blue {
+    @apply bg-blue-600 shadow-blue-200 enabled:hover:bg-blue-700;
+  }
+  .btn-green {
+    @apply bg-green-600 shadow-green-100 enabled:hover:bg-green-700;
+  }
+  .btn-blue-light {
+    @apply bg-blue-500 shadow-blue-100 enabled:hover:bg-blue-600;
+  }
+
+  .btn-small {
+    @apply rounded-xl px-5 py-3 text-sm shadow-lg;
+  }
+  .btn-big {
+    @apply rounded-2xl px-10 py-4 text-lg shadow-xl;
+  }
+
+  /* Элементы управления и навигация */
+  .btn-file-control {
+    @apply cursor-pointer rounded-lg p-2 text-gray-400 transition-all hover:bg-white hover:shadow-sm;
+  }
+  .btn-non-priority {
+    @apply cursor-pointer px-8 py-4 text-center text-sm font-bold text-gray-400 transition-colors hover:text-gray-700;
+  }
+  .btn-sidebar {
+    @apply flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2 font-medium transition-colors;
+  }
+  .link-standard {
+    @apply mb-6 flex cursor-pointer items-center gap-2 text-sm text-gray-500 transition-colors hover:text-blue-600;
+  }
+
+  /* Сетка таблиц данных (Data Tables Layout) */
+  .row-files-table {
+    @apply grid grid-cols-[minmax(200px,4fr)_1fr_1fr_1fr_1fr_1fr] gap-4 rounded-2xl border-b px-6;
+  }
+  .row-users-table {
+    @apply grid grid-cols-[minmax(200px,1fr)_1fr_1fr_1fr_1fr_1fr] items-center gap-4 rounded-2xl border-b px-6;
+  }
+
+  .col-table-title {
+    @apply text-center text-xs font-bold uppercase tracking-wider text-gray-500;
+  }
+  .col-table {
+    @apply flex items-center justify-center whitespace-nowrap py-4;
+  }
+}
+
+/*
+ * Вспомогательные утилиты и кастомные анимации.
+ */
+@utility animate-slide-infinite {
+  animation: slide-down-infinite 0.5s linear infinite;
+}
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-blue-200);
+    border-radius: 10px;
+    transition: background 0.2s;
+  }
+  &:hover::-webkit-scrollbar-thumb {
+    background: var(--color-blue-300);
+  }
+}
+
+@utility animate-steps {
+  animation: steps-rotate 0.4s steps(8) infinite;
+  mask-image: conic-gradient(from 10deg, black 20%, transparent 100%);
+  -webkit-mask-image: conic-gradient(from 10deg, black 20%, transparent 100%);
+}
+
+/* Ключевые кадры анимаций */
+@keyframes steps-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes slide-down-infinite {
+  0% {
+    transform: translateY(-60%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(60%);
+    opacity: 0;
   }
 }

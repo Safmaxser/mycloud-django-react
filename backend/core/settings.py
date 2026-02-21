@@ -12,6 +12,9 @@ env = environ.Env(
     CSRF_TRUSTED_ORIGINS=(list, []),
     SESSION_COOKIE_DOMAIN=(str, ''),
     CSRF_COOKIE_DOMAIN=(str, ''),
+    STORAGE_QUOTA_MB=(int, 2048),
+    MAX_FILE_SIZE_MB=(int, 500),
+    FILE_SERVE_METHOD=(str, 'django'),
 )
 
 environ.Env.read_env(BASE_DIR.parent / '.env')
@@ -63,7 +66,8 @@ CSRF_COOKIE_DOMAIN = env('CSRF_COOKIE_DOMAIN')
 
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
 
 REST_FRAMEWORK = {
@@ -89,7 +93,7 @@ REST_FRAMEWORK = {
         'user': '2000/hour',
     },
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20,
+    'PAGE_SIZE': 10,
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 }
 
@@ -176,3 +180,10 @@ TIME_ZONE = 'Europe/Moscow'
 USE_I18N = True
 USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+STORAGE_QUOTA_BYTES = int(env.int('STORAGE_QUOTA_MB')) * 1024 * 1024  # type: ignore
+MAX_FILE_SIZE_BYTES = int(env.int('MAX_FILE_SIZE_MB')) * 1024 * 1024  # type: ignore
+
+FILE_SERVE_METHOD = str(env('FILE_SERVE_METHOD')).lower()
+if FILE_SERVE_METHOD not in ['django', 'nginx']:
+    FILE_SERVE_METHOD = 'django'

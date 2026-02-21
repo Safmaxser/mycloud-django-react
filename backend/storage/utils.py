@@ -1,25 +1,43 @@
 import logging
+import urllib.parse
 
-from django.http import HttpResponse
+from django.conf import settings
+from django.http import FileResponse, HttpResponse
 
 logger = logging.getLogger('storage')
 
 
 def generate_file_response(file_obj, inline: bool = False):
     """
-    Формирует HTTP-ответ для отдачи файла через Nginx (X-Accel-Redirect).
-    Параметр inline=True позволяет браузеру отобразить файл (превью),
-    вместо принудительного скачивания.
+    Формирует HTTP-ответ для отдачи файла.
+    Выбирает метод (Nginx X-Accel-Redirect или Django FileResponse)
+    на основе настроек FILE_SERVE_METHOD.
     """
     try:
+        if settings.FILE_SERVE_METHOD == 'django':
+            logger.debug(
+                'Отдача файла через Django FileResponse: '
+                f'{file_obj.original_name} (ID: {file_obj.id}) '
+            )
+            response = FileResponse(
+                open(file_obj.file.path, 'rb'),
+                as_attachment=not inline,
+                filename=file_obj.original_name,
+            )
+            response['Content-Type'] = file_obj.mimetype
+            return response
+
+        filename_quoted = urllib.parse.quote(file_obj.original_name)
+        disposition = 'inline' if inline else 'attachment'
         response = HttpResponse()
         response['X-Accel-Redirect'] = f'/protected_files/{file_obj.file.name}'
-        disposition = 'inline' if inline else 'attachment'
-        filename = file_obj.original_name.encode('utf-8').decode('latin-1')
         response['Content-Type'] = file_obj.mimetype
-        response['Content-Disposition'] = f'{disposition}; filename="{filename}"'
+        response['Content-Disposition'] = (
+            f'{disposition}; filename="{file_obj.original_name}"; '
+            f"filename*=UTF-8''{filename_quoted}"
+        )
         logger.debug(
-            'Подготовлен X-Accel-Redirect для файла: '
+            'Подготовлен X-Accel-Redirect для Nginx: '
             f'{file_obj.original_name} (ID: {file_obj.id}) '
             f'(Internal Path: {file_obj.file.name})'
         )
