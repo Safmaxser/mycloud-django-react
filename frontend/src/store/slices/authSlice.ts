@@ -1,9 +1,11 @@
+import type { PayloadAction } from '@reduxjs/toolkit';
 import { createAppSlice } from '../createAppSlice';
 
 import { authService } from '../../api/services/authService';
 import { parseError } from '../../utils/errors';
 import { unauthorizedError } from '../actions';
 import type { User, LoginResponse, RegisterRequest } from '../../types/user';
+import type { ThunkConfig } from '../../types/common';
 
 /** Состояние аутентификации и профиля пользователя. */
 export interface AuthState {
@@ -39,8 +41,18 @@ export const authSlice = createAppSlice({
       state.error = null;
     }),
 
+    /**
+     * Обработчик WebSocket-события: обновление профиля текущего пользователя.
+     * Гарантирует актуальность данных сессии и прав доступа в реальном времени.
+     */
+    updateCurrentUser: create.reducer((state, action: PayloadAction<User>) => {
+      if (state.user && state.user.id === action.payload.id) {
+        state.user = { ...state.user, ...action.payload };
+      }
+    }),
+
     /** Регистрация нового аккаунта. */
-    registerUser: create.asyncThunk<User, RegisterRequest>(
+    registerUser: create.asyncThunk<User, RegisterRequest, ThunkConfig>(
       async (data, { rejectWithValue, signal }) => {
         try {
           return await authService.register(data, { signal });
@@ -58,13 +70,13 @@ export const authSlice = createAppSlice({
         },
         rejected: (state, action) => {
           state.isSubmitting = false;
-          state.error = action.payload as string;
+          state.error = action.payload ?? null;
         },
       },
     ),
 
     /** Авторизация пользователя и сохранение данных в состояние. */
-    loginUser: create.asyncThunk<LoginResponse, Record<string, string>>(
+    loginUser: create.asyncThunk<LoginResponse, Record<string, string>, ThunkConfig>(
       async (credentials, { rejectWithValue, signal }) => {
         try {
           return await authService.login(credentials, { signal });
@@ -84,7 +96,7 @@ export const authSlice = createAppSlice({
         },
         rejected: (state, action) => {
           state.isSubmitting = false;
-          state.error = action.payload as string;
+          state.error = action.payload ?? null;
         },
       },
     ),

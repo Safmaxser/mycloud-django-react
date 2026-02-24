@@ -5,7 +5,9 @@ import { adminService } from '../../api/services/adminService';
 import { deleteMe, logoutUser } from './authSlice';
 import { unauthorizedError } from '../actions';
 import { parseError } from '../../utils/errors';
+import { PAGE_SIZE } from '../../constants/config';
 import type { User, UserListResponse } from '../../types/user';
+import type { ThunkConfig } from '../../types/common';
 
 /** Состояние модуля административного управления пользователями. */
 export interface AdminState {
@@ -65,8 +67,62 @@ export const adminSlice = createAppSlice({
       state.page = action.payload;
     }),
 
+    /** Внутренняя логика обновления или добавления файла в массив состояния. */
+    performSync: create.reducer((state, action: PayloadAction<User>) => {
+      const user = action.payload;
+      const index = state.users.findIndex((u) => u.id === user.id);
+      if (index !== -1) {
+        state.users[index] = { ...state.users[index], ...user };
+      } else {
+        // Добавляем файл в начало списка только если пользователь на 1-й странице без фильтров
+        if (state.page === 1 && !state.search && !state.ordering) {
+          state.users.unshift(user);
+          state.totalCount += 1;
+          if (state.users.length > PAGE_SIZE) {
+            state.users.pop();
+          }
+        } else {
+          state.totalCount += 1;
+        }
+      }
+    }),
+
+    /**
+     * Обработчик WebSocket-события: создание или обновление данных пользователя.
+     * Синхронизирует список администратора при регистрации или изменении профилей.
+     */
+    syncUser: create.reducer(
+      (
+        state,
+        action: PayloadAction<{
+          updatedUser: User;
+          currentUser: User;
+        }>,
+      ) => {
+        const { updatedUser, currentUser } = action.payload;
+        if (updatedUser.id === currentUser.id) return;
+        adminSlice.caseReducers.performSync(state, {
+          payload: updatedUser,
+          type: 'admin/performSync',
+        });
+      },
+    ),
+
+    /**
+     * Универсальный метод удаления пользователя из локального состояния.
+     * Применяется при подтверждении удаления через API или получении события по WebSocket.
+     */
+    removeUser: create.reducer((state, action: PayloadAction<string>) => {
+      const userId = action.payload;
+      const initialLength = state.users.length;
+      state.users = state.users.filter((u) => u.id !== userId);
+      if (state.users.length < initialLength) {
+        state.totalCount = Math.max(0, state.totalCount - 1);
+      }
+    }),
+
     /** Получения списка пользователей с учетом фильтров. */
-    fetchUsers: create.asyncThunk<UserListResponse, void>(
+    fetchUsers: create.asyncThunk<UserListResponse, void, ThunkConfig>(
       async (_, { getState, rejectWithValue, signal }) => {
         const state = getState() as { admin: AdminState };
         const { page, ordering, search } = state.admin;
@@ -88,7 +144,7 @@ export const adminSlice = createAppSlice({
         },
         rejected: (state, action) => {
           state.loading = false;
-          state.error = action.payload as string;
+          state.error = action.payload ?? null;
         },
       },
     ),
@@ -107,28 +163,30 @@ export const adminSlice = createAppSlice({
       },
       {
         fulfilled: (state, action) => {
-          const index = state.users.findIndex((u) => u.id === action.payload.id);
-          if (index !== -1) {
-            state.users[index] = action.payload;
-          }
+          adminSlice.caseReducers.performSync(state, {
+            payload: action.payload,
+            type: 'admin/performSync',
+          });
         },
       },
     ),
 
     /** Удаление пользователя из системы и обновление счетчика. */
-    deleteUser: create.asyncThunk<string, string>(
+    deleteUser: create.asyncThunk<void, string>(
       async (id, { rejectWithValue }) => {
         try {
           await adminService.deleteUser(id);
-          return id;
         } catch (error) {
           return rejectWithValue(parseError(error, 'Не удалось удалить пользователя.'));
         }
       },
       {
         fulfilled: (state, action) => {
-          state.users = state.users.filter((u) => u.id !== action.payload);
-          state.totalCount -= 1;
+          const userId = action.meta.arg;
+          adminSlice.caseReducers.removeUser(state, {
+            payload: userId,
+            type: 'admin/removeUser',
+          });
         },
       },
     ),

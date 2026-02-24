@@ -22,18 +22,27 @@ interface ProfileField {
   type: string;
   prefix?: string;
   placeholder?: string;
+  autoComplete?: string;
 }
 
 const PROFILE_FIELDS: readonly ProfileField[] = [
-  { id: 'username', label: 'Логин', icon: User, type: 'text', prefix: '@' },
-  { id: 'email', label: 'Почта', icon: Mail, type: 'email' },
-  { id: 'full_name', label: 'Полное имя', icon: IdCard, type: 'text' },
+  {
+    id: 'username',
+    label: 'Логин',
+    icon: User,
+    type: 'text',
+    prefix: '@',
+    autoComplete: 'username',
+  },
+  { id: 'email', label: 'Почта', icon: Mail, type: 'email', autoComplete: 'email' },
+  { id: 'full_name', label: 'Полное имя', icon: IdCard, type: 'text', autoComplete: 'name' },
   {
     id: 'password',
     label: 'Новый пароль',
     icon: Key,
     type: 'password',
     placeholder: 'Оставьте пустым...',
+    autoComplete: 'new-password',
   },
 ] as const;
 
@@ -158,6 +167,7 @@ export function ProfileEditModal({ userId, onClose }: ProfileEditModalProps) {
               label={field.label}
               icon={field.icon}
               type={field.type}
+              autoComplete={field.autoComplete}
               placeholder={field.placeholder}
               value={formData[field.id]}
               error={errors[field.id]}

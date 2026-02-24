@@ -3,10 +3,13 @@ import shutil
 import uuid
 
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser, UserManager
+from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import EmailValidator, RegexValidator
 from django.db import models
+from django.db.models import Count, Sum, Value
+from django.db.models.functions import Coalesce
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 
@@ -17,6 +20,30 @@ username_regex = RegexValidator(
         'с буквы и содержать только латиницу и цифры.'
     ),
 )
+
+
+class UserQuerySet(models.QuerySet):
+    """
+    Набор методов для расширенных запросов к модели пользователя.
+    """
+
+    def with_stats(self):
+        """
+        Аннотирует пользователей статистикой хранилища (объем и количество файлов).
+        Используется для синхронизации данных через API и WebSocket.
+        """
+        return self.annotate(
+            files_total_size=Coalesce(Sum('files__size'), Value(0)),
+            files_count=Count('files'),
+        )
+
+
+class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
+    """
+    Менеджер модели пользователя с поддержкой методов UserQuerySet.
+    """
+
+    pass
 
 
 class User(AbstractUser):
@@ -35,7 +62,13 @@ class User(AbstractUser):
     )
     password = models.CharField(max_length=128, validators=[validate_password])
     username = models.CharField(
-        max_length=20, unique=True, validators=[username_regex], verbose_name='Логин'
+        max_length=20,
+        unique=True,
+        validators=[username_regex],
+        verbose_name='Логин',
+        error_messages={
+            'unique': 'Пользователь с таким логином уже существует.',
+        },
     )
     full_name = models.CharField(max_length=255, blank=True, verbose_name='Полное имя')
     storage_path = models.CharField(
@@ -45,6 +78,9 @@ class User(AbstractUser):
         unique=True,
         validators=[EmailValidator(message='Введите корректный формат email')],
         verbose_name='Электронная почта',
+        error_messages={
+            'unique': 'Пользователь с такой электронной почтой уже существует.',
+        },
     )
     is_staff = models.BooleanField(default=False, verbose_name='Статус администратора')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата изменения')
@@ -52,7 +88,7 @@ class User(AbstractUser):
         auto_now_add=True, verbose_name='Дата регистрации'
     )
 
-    objects = UserManager()
+    objects: UserManager = UserManager()  # type: ignore[assignment]
 
     class Meta:
         verbose_name = 'Пользователь'

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { UserPlus, Lock, Mail, User as UserIcon, IdCard } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
@@ -24,7 +24,6 @@ import { AuthHeader } from '../components/UI/AuthHeader';
 export function RegisterPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
   const { isSubmitting, error } = useAppSelector((state) => state.auth);
   const registerPromiseRef = useRef<Abortable | null>(null);
   const {
@@ -41,7 +40,7 @@ export function RegisterPage() {
       registerPromiseRef.current = promise;
       await promise.unwrap();
       toast.success('Регистрация успешна! Теперь вы можете войти');
-      navigate(ROUTES.LOGIN, { state: location.state });
+      navigate(ROUTES.LOGIN, { replace: true });
     } catch (error) {
       if (error) toast.error(error as string);
     } finally {
@@ -92,6 +91,7 @@ export function RegisterPage() {
               label="Пароль"
               icon={Lock}
               type="password"
+              autoComplete="new-password"
               placeholder="••••••••"
               error={errors.password?.message}
               {...register('password')}
@@ -100,6 +100,7 @@ export function RegisterPage() {
               label="Повторите пароль"
               icon={Lock}
               type="password"
+              autoComplete="new-password"
               placeholder="••••••••"
               error={errors.confirmPassword?.message}
               {...register('confirmPassword')}

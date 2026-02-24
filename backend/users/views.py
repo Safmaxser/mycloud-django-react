@@ -1,5 +1,5 @@
 import logging
-from typing import Type
+from typing import Type, cast
 
 from django.contrib.auth import (
     authenticate,
@@ -18,6 +18,7 @@ from rest_framework.views import APIView
 
 from core.permissions import IsOwnerOrAdmin
 
+from .models import UserQuerySet
 from .serializers import (
     UserDetailSerializer,
     UserMeSerializer,
@@ -53,10 +54,7 @@ class UserViewSet(viewsets.ModelViewSet):
         Исключает текущего админа из общего списка для удобства управления.
         """
         user = self.request.user
-        queryset = self.queryset.annotate(
-            files_total_size=Coalesce(Sum('files__size'), Value(0)),
-            files_count=Count('files'),
-        )
+        queryset = cast(UserQuerySet, self.queryset).with_stats()
         if user.is_staff:
             if self.action == 'list':
                 return queryset.exclude(pk=user.pk)

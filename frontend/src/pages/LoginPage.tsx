@@ -1,6 +1,6 @@
 import { useEffect, useRef, type BaseSyntheticEvent } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Lock, User as UserIcon } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -23,7 +23,6 @@ import { AuthHeader } from '../components/UI/AuthHeader';
 export function LoginPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
   const { isSubmitting, isAuthenticated, error } = useAppSelector((state) => state.auth);
   const loginPromiseRef = useRef<Abortable | null>(null);
   const {
@@ -45,10 +44,9 @@ export function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      const from = location.state?.from?.pathname || ROUTES.HOME;
-      navigate(from, { replace: true });
+      navigate(ROUTES.HOME, { replace: true });
     }
-  }, [isAuthenticated, navigate, location.state]);
+  }, [isAuthenticated, navigate]);
 
   useEffect(() => {
     dispatch(clearAuthError());
@@ -73,6 +71,7 @@ export function LoginPage() {
           <FormInput
             label="Имя пользователя"
             icon={UserIcon}
+            autoComplete="username"
             placeholder="ivan_cloud"
             error={errors.username?.message}
             {...register('username')}
@@ -81,6 +80,7 @@ export function LoginPage() {
             label="Пароль"
             icon={Lock}
             type="password"
+            autoComplete="current-password"
             placeholder="••••••••"
             error={errors.password?.message}
             {...register('password')}

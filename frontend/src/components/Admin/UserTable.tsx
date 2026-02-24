@@ -1,16 +1,10 @@
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setOrdering } from '../../store/slices/adminSlice';
 
+import type { TableColumn } from '../../types/common';
 import type { User } from '../../types/user';
 import { UserRow } from './UserRow';
 import { SortHeader } from '../UI/SortHeader';
-
-
-export interface TableColumn {
-  label: string;
-  field: string | null;
-  className?: string;
-}
 
 export const USER_TABLE_COLUMNS: readonly TableColumn[] = [
   { label: 'Пользователь', field: 'username', className: 'justify-start' },

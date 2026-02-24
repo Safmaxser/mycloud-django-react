@@ -5,6 +5,7 @@ import uuid
 from typing import TYPE_CHECKING
 
 from django.conf import settings
+from django.core.cache import cache
 from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
@@ -73,13 +74,24 @@ class File(models.Model):
         verbose_name_plural = 'Файлы'
         ordering = ('-created_at',)
 
-    def touch_download(self):
+    def touch_download(self, request=None):
         """
-        Обновляет статистику скачиваний файла.
+        Обновляет статистику скачиваний файла с защитой от дублирования.
+        Использует Redis-кэш для ограничения частоты обновлений по IP-адресу.
         """
+        if not request or request.method != 'GET':
+            return
+
+        ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR'))
+        cache_key = f'dl_lock_{self.id}_{ip}'
+
+        if cache.get(cache_key):
+            return
+
         self.last_download_at = timezone.now()
         self.download_count += 1
         self.save(update_fields=['last_download_at', 'download_count'])
+        cache.set(cache_key, True, 2)
 
     def generate_special_link(self):
         """

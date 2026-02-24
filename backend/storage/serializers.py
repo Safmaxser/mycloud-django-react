@@ -11,7 +11,7 @@ class FileSerializer(serializers.ModelSerializer):
     """
 
     file = serializers.FileField(allow_empty_file=True)
-    owner_username = serializers.ReadOnlyField(source='owner.username')
+    owner_id = serializers.UUIDField(source='owner.id', read_only=True)
 
     class Meta:
         model = File
@@ -23,7 +23,7 @@ class FileSerializer(serializers.ModelSerializer):
             'comment',
             'special_link_token',
             'mimetype',
-            'owner_username',
+            'owner_id',
             'download_count',
             'last_download_at',
             'created_at',

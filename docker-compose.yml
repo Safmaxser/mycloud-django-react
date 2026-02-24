@@ -10,6 +10,12 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
 
+  redis:
+    image: ${DOCKER_REGISTRY_MIRROR:-}redis:7-alpine
+    restart: unless-stopped
+    expose:
+      - "6379"
+
   backend:
     build:
       context: .
@@ -19,16 +25,18 @@ services:
       - "8000"
     depends_on:
       - db
+      - redis
     volumes:
       - django_static:/app/staticfiles
       - django_protected:/app/protected_media
     env_file: .env
     environment:
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+      - BASE_REDIS_URL=${BASE_REDIS_URL}
     command: >
       sh -c "uv run python manage.py migrate &&
              uv run python manage.py collectstatic --noinput &&
-             uv run gunicorn core.wsgi:application --bind 0.0.0.0:8000"
+             uv run uvicorn core.asgi:application --host 0.0.0.0 --port 8000"
 
   frontend:
     build:

@@ -1,15 +1,10 @@
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import { setOrdering } from '../../../store/slices/storageSlice';
 
+import type { TableColumn } from '../../../types/common';
 import type { FileItem } from '../../../types/storage';
 import { FileRow } from './FileRow';
 import { SortHeader } from '../../UI/SortHeader';
-
-export interface TableColumn {
-  label: string;
-  field: string | null;
-  className?: string;
-}
 
 export const FILE_TABLE_COLUMNS: readonly TableColumn[] = [
   { label: 'Название', field: 'original_name', className: 'justify-start' },

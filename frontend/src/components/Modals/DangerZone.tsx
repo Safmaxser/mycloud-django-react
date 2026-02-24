@@ -15,7 +15,7 @@ export function DangerZone({ onDelete, title, description, buttonText }: DangerZ
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="mt-10 border-t border-red-50 pt-6">
+    <div className="mt-6 border-t border-red-50 pt-3">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -33,8 +33,8 @@ export function DangerZone({ onDelete, title, description, buttonText }: DangerZ
       </button>
 
       {isOpen && (
-        <div className="animate-in fade-in slide-in-from-top-3 mt-4 duration-500">
-          <div className="rounded-4xl bg-red-50/30 p-8 ring-1 ring-red-100/50">
+        <div className="animate-in fade-in slide-in-from-top-3 mt-1 duration-500">
+          <div className="rounded-4xl bg-red-50/30 p-4 ring-1 ring-red-100/50">
             <div className="flex items-start gap-4">
               <div className="rounded-xl bg-red-100 p-2 text-red-600">
                 <AlertOctagon className="h-5 w-5" />

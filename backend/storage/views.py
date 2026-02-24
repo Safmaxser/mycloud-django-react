@@ -74,7 +74,7 @@ class FileViewSet(viewsets.ModelViewSet):
             f'Пользователь {request.user} начал скачивание файла: '
             f'{file_obj.original_name} (ID: {file_obj.id})'
         )
-        file_obj.touch_download()
+        file_obj.touch_download(request)
         is_inline = request.query_params.get('inline') == 'true'
         return generate_file_response(file_obj, inline=is_inline)
 
@@ -127,6 +127,6 @@ class ExternalDownloadView(APIView):
             f'Анонимное скачивание по токену для файла: '
             f'{file_obj.original_name} (ID: {file_obj.id})'
         )
-        file_obj.touch_download()
+        file_obj.touch_download(request)
         is_inline = request.query_params.get('inline') == 'true'
         return generate_file_response(file_obj, inline=is_inline)

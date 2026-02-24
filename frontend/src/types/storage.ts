@@ -4,7 +4,7 @@ export interface FileItem {
   original_name: string;
   size: number;
   comment: string | null;
-  owner_username: string;
+  owner_id: string;
   special_link_token: string | null;
   download_count: number;
   created_at: string;
