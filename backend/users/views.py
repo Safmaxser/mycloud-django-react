@@ -1,25 +1,22 @@
 import logging
-from typing import Type, cast
+from typing import Any, Dict, Type, cast
 
 from django.contrib.auth import (
-    authenticate,
     get_user_model,
     login,
     logout,
     update_session_auth_hash,
 )
-from django.db.models import Count, QuerySet, Sum, Value
-from django.db.models.functions import Coalesce
-from rest_framework import filters, permissions, status, viewsets
+from django.db.models import QuerySet
+from rest_framework import filters, permissions, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 from rest_framework.views import APIView
 
-from core.permissions import IsOwnerOrAdmin
-
 from .models import UserQuerySet
 from .serializers import (
+    LoginSerializer,
     UserDetailSerializer,
     UserMeSerializer,
     UserRegistrationSerializer,
@@ -36,7 +33,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     queryset = User.objects.all()
     serializer_class = UserDetailSerializer
-    permission_classes = [IsOwnerOrAdmin]
+    permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['username', 'full_name', 'email']
     ordering_fields = [
@@ -67,16 +64,15 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         if self.action == 'create':
             return [permissions.AllowAny()]
-        if self.action == 'list':
-            return [permissions.IsAdminUser()]
-        return super().get_permissions()
+        if self.action == 'me':
+            return super().get_permissions()
+        return [permissions.IsAdminUser()]
 
     def get_serializer_class(self) -> Type[BaseSerializer]:  # type: ignore[override]
-        """
-        Динамический выбор сериализатора в зависимости от действия.
-        """
         if self.action == 'create':
             return UserRegistrationSerializer
+        if self.action == 'me':
+            return UserMeSerializer
         return super().get_serializer_class()
 
     def perform_create(self, serializer):
@@ -111,16 +107,14 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         user = self.get_queryset().get(pk=request.user.pk)
         if request.method == 'GET':
-            serializer = UserMeSerializer(user, context={'request': request})
+            serializer = self.get_serializer(user)
             return Response(serializer.data)
         if request.method == 'DELETE':
-            user.delete()
+            self.perform_destroy(user)
             return Response(status=status.HTTP_204_NO_CONTENT)
-        serializer = UserMeSerializer(
-            user, data=request.data, partial=True, context={'request': request}
-        )
+        serializer = self.get_serializer(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        self.perform_update(serializer)
         if 'password' in request.data:
             update_session_auth_hash(request, user)
         return Response(serializer.data)
@@ -135,28 +129,25 @@ class JsonLoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            user_with_stats = User.objects.annotate(
-                files_total_size=Coalesce(Sum('files__size'), Value(0)),
-                files_count=Count('files'),
-            ).get(pk=user.pk)
-
-            login(request, user)
-            logger.info(f'Пользователь {user.username} успешно вошел в систему')
-            serializer = UserDetailSerializer(
-                user_with_stats, context={'request': request}
-            )
-            return Response(
-                {'detail': 'Сессия успешно создана', 'user': serializer.data},
-                status=status.HTTP_200_OK,
-            )
-        logger.warning(f'Неудачная попытка входа для пользователя: {username}')
+        serializer = LoginSerializer(data=request.data, context={'request': request})
+        try:
+            serializer.is_valid(raise_exception=True)
+        except serializers.ValidationError:
+            username = request.data.get('username', 'unknown')
+            logger.warning(f'Неудачная попытка входа для пользователя: {username}')
+            raise
+        data = cast(Dict[str, Any], serializer.validated_data)
+        user = data['user']
+        user_queryset = cast(UserQuerySet, User.objects)
+        user_with_stats = user_queryset.with_stats().get(pk=user.pk)
+        login(request, user)
+        logger.info(f'Пользователь {user.username} успешно вошел в систему')
+        response_serializer = UserDetailSerializer(
+            user_with_stats, context={'request': request}
+        )
         return Response(
-            {'detail': 'Ошибка аутентификации: неверные учетные данные'},
-            status=status.HTTP_401_UNAUTHORIZED,
+            {'detail': 'Сессия успешно создана', 'user': response_serializer.data},
+            status=status.HTTP_200_OK,
         )
 
 

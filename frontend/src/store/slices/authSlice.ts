@@ -45,7 +45,7 @@ export const authSlice = createAppSlice({
      * Обработчик WebSocket-события: обновление профиля текущего пользователя.
      * Гарантирует актуальность данных сессии и прав доступа в реальном времени.
      */
-    updateCurrentUser: create.reducer((state, action: PayloadAction<User>) => {
+    syncCurrentUser: create.reducer((state, action: PayloadAction<User>) => {
       if (state.user && state.user.id === action.payload.id) {
         state.user = { ...state.user, ...action.payload };
       }

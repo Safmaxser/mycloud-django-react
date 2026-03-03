@@ -4,9 +4,11 @@ import tempfile
 
 import pytest
 from django.contrib.auth import get_user_model
+from django.core.files.base import ContentFile
 from django.utils.crypto import get_random_string
 from model_bakery import baker
 from rest_framework.test import APIClient
+
 from storage.models import File
 
 User = get_user_model()
@@ -32,7 +34,7 @@ def use_temp_media_dir(settings):
 
 
 @pytest.fixture
-def client():
+def client(db):
     """
     Фикстура API-клиента для выполнения запросов.
     """
@@ -60,10 +62,27 @@ def user_factory(db):
 @pytest.fixture
 def file_factory():
     """
-    Фабрика для генерации файлов в базе данных.
+    Фабрика для генерации файлов с реальным контентом на диске.
     """
 
     def factory(**kwargs):
-        return baker.make(File, **kwargs)
+        if 'size' in kwargs and 'file' not in kwargs:
+            kwargs['file'] = ContentFile(b'fake', name='quota_test.txt')
+        if 'file' not in kwargs:
+            kwargs['file'] = ContentFile(b'fake file content', name='test_file.txt')
+        if 'original_name' not in kwargs:
+            kwargs['original_name'] = 'test_file.txt'
+        if 'size' not in kwargs:
+            kwargs['size'] = 17
+        instance = baker.make(File, **kwargs)
+        if 'size' in kwargs:
+            if isinstance(instance, list):
+                for obj in instance:
+                    obj.size = kwargs['size']
+                File.objects.bulk_update(instance, ['size'])
+            else:
+                instance.size = kwargs['size']
+                instance.save(update_fields=['size'])
+        return instance
 
     return factory

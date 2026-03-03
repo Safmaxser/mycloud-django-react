@@ -8,7 +8,8 @@ omit =
     */admin.py
     */migrations/*
     tests/*
-    */tests.py
+    **/tests/**
+    */test_*.py
 
 [report]
 skip_empty = True
@@ -17,3 +18,4 @@ exclude_lines =
     pragma: no cover
     def __str__
     if TYPE_CHECKING:
+    if IS_TESTING:

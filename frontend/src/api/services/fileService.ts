@@ -38,7 +38,7 @@ export const fileService = {
     name: string,
     onProgress?: (p: number | null) => void,
     options?: AxiosRequestConfig,
-  ) => {
+  ): Promise<void> => {
     const response = await apiClient.get(`/files/${id}/download/`, {
       ...options,
       responseType: 'blob',
@@ -67,7 +67,7 @@ export const fileService = {
     id: string,
     onProgress?: (p: number | null) => void,
     options?: AxiosRequestConfig,
-  ) => {
+  ): Promise<string> => {
     const response = await apiClient.get(`/files/${id}/download/`, {
       ...options,
       responseType: 'blob',
@@ -90,9 +90,8 @@ export const fileService = {
   },
 
   /** Отзыв (удаление) токена публичного доступа. */
-  revokeShareLink: async (id: string): Promise<{ token: string }> => {
-    const response = await apiClient.post(`/files/${id}/revoke-link/`);
-    return response.data;
+  revokeShareLink: async (id: string): Promise<void> => {
+    await apiClient.post(`/files/${id}/revoke-link/`);
   },
 
   /** Получение списка файлов с фильтрацией по пользователю, поиском и пагинацией. */

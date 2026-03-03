@@ -48,7 +48,7 @@ export const handleSocketMessage = (
     case 'USER_UPDATED':
       if (payload.id === currentUser?.id) {
         const wasStaff = currentUser?.is_staff;
-        dispatch(authSlice.actions.updateCurrentUser(payload));
+        dispatch(authSlice.actions.syncCurrentUser(payload));
         if (wasStaff !== payload.is_staff) {
           socketManager.send({ command: 'update_subscriptions' });
         }

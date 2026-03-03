@@ -24,7 +24,7 @@ export function MainLayout({
     <div className="flex h-screen bg-gray-50">
       <Sidebar />
       <div className="relative flex flex-1 flex-col overflow-hidden bg-white">
-        <header className="relative flex h-18 shrink-0 items-center justify-between gap-6 border-b border-gray-200 bg-white px-8">
+        <header className="h-18 relative flex shrink-0 items-center justify-between gap-6 border-b border-gray-200 bg-white px-8">
           <div className="flex flex-1 items-center gap-6">{headerContent}</div>
           <div className="flex w-full max-w-2xl items-center gap-4">
             {searchInput}

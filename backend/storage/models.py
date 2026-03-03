@@ -7,8 +7,6 @@ from typing import TYPE_CHECKING
 from django.conf import settings
 from django.core.cache import cache
 from django.db import models
-from django.db.models.signals import post_delete
-from django.dispatch import receiver
 from django.utils import timezone
 
 if TYPE_CHECKING:
@@ -125,27 +123,3 @@ class File(models.Model):
 
     def __str__(self):
         return f'{self.owner.username} | {self.original_name}'
-
-
-@receiver(post_delete, sender=File)
-def auto_delete_file_on_delete(sender, instance: File, **kwargs):
-    """
-    Удаляет файл и пустые родительские папки дат.
-    """
-    if not instance.file:
-        return
-
-    file_path = instance.file.path
-    if os.path.isfile(file_path):
-        os.remove(file_path)
-
-        directory = os.path.dirname(file_path)
-        for _ in range(3):
-            try:
-                if not os.listdir(directory):
-                    os.rmdir(directory)
-                    directory = os.path.dirname(directory)
-                else:
-                    break
-            except (OSError, FileNotFoundError):  # pragma: no cover
-                break

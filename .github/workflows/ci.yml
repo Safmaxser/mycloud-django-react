@@ -1,0 +1,109 @@
+# GitHub Actions Workflow для автоматизации тестирования и проверки качества кода (CI).
+# Включает в себя: Линтинг (Ruff, ESLint), Проверку стиля (Prettier),
+# Unit/Integration тесты (Pytest, Vitest) и проверку сборки (Vite).
+
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  # --- BACKEND: Проверка Python/Django инфраструктуры ---
+  backend-ci:
+    name: Backend Quality Check
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: cloud_db
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: "backend/pyproject.toml"
+
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+
+      - name: Lint & Style Check (Ruff)
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+
+      - name: Run Pytest with Coverage
+        env:
+          DATABASE_URL: postgres://user:password@localhost:5432/cloud_db
+          BASE_REDIS_URL: redis://localhost:6379
+          SECRET_KEY: ci-test-key-123
+          DEBUG: "False"
+        run: |
+          uv run pytest --cov=storage --cov=users --cov=core --cov-report=xml --cov-branch
+
+  # --- FRONTEND: Проверка React/TypeScript инфраструктуры ---
+  frontend-ci:
+    name: Frontend Quality Check
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+          cache-dependency-path: frontend/yarn.lock
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Check Code Style (Prettier)
+        run: yarn format:check
+
+      - name: Lint Logic (ESLint)
+        run: yarn lint
+
+      - name: Run Tests (Vitest)
+        run: yarn test:run
+
+      - name: Build Check (Vite)
+        run: yarn build

@@ -9,7 +9,7 @@ export function ProgressOverlay({ progress }: ProgressOverlayProps) {
   }
 
   return (
-    <div className="absolute left-0 bottom-0 z-20 h-1 w-full bg-gray-100">
+    <div className="absolute bottom-0 left-0 z-20 h-1 w-full bg-gray-100">
       <div
         className="bg-linear-to-r h-full from-blue-600 to-blue-400 shadow-[0_0_8px_rgba(37,99,235,0.5)] transition-all duration-300 ease-out"
         style={{ width: `${progress}%` }}

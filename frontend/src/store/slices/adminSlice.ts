@@ -2,7 +2,6 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { createAppSlice } from '../createAppSlice';
 
 import { adminService } from '../../api/services/adminService';
-import { deleteMe, logoutUser } from './authSlice';
 import { unauthorizedError } from '../actions';
 import { parseError } from '../../utils/errors';
 import { PAGE_SIZE } from '../../constants/config';
@@ -140,7 +139,7 @@ export const adminSlice = createAppSlice({
         fulfilled: (state, action) => {
           state.loading = false;
           state.users = action.payload.results || [];
-          state.totalCount = action.payload.count;
+          state.totalCount = action.payload.count || 0;
         },
         rejected: (state, action) => {
           state.loading = false;
@@ -194,8 +193,15 @@ export const adminSlice = createAppSlice({
 
   extraReducers: (builder) => {
     // Сброс данных при выходе или потере авторизации
-    [logoutUser.fulfilled, deleteMe.fulfilled, unauthorizedError].forEach((action) => {
-      builder.addCase(action, (state) => Object.assign(state, initialState));
+    const resetActions = [
+      'auth/logout/fulfilled',
+      'auth/deleteMe/fulfilled',
+      unauthorizedError.type,
+    ];
+    resetActions.forEach((action) => {
+      builder.addCase(action, (state) => {
+        Object.assign(state, initialState);
+      });
     });
   },
 });

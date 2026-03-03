@@ -2,7 +2,6 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { createAppSlice } from '../createAppSlice';
 
 import { fileService } from '../../api/services/fileService';
-import { deleteMe, logoutUser } from './authSlice';
 import { unauthorizedError } from '../actions';
 
 import { parseError } from '../../utils/errors';
@@ -91,7 +90,9 @@ export const storageSlice = createAppSlice({
         if (state.page === 1 && !state.search && !state.ordering) {
           state.files.unshift(file);
           state.totalCount += 1;
-          if (state.files.length > PAGE_SIZE) state.files.pop();
+          if (state.files.length > PAGE_SIZE) {
+            state.files.pop();
+          }
         } else {
           state.totalCount += 1;
         }
@@ -333,7 +334,7 @@ export const storageSlice = createAppSlice({
         fulfilled: (state, action) => {
           state.loading = false;
           state.files = action.payload.results || [];
-          state.totalCount = action.payload.count;
+          state.totalCount = action.payload.count || 0;
           state.userId = action.meta.arg?.userId || null;
         },
         rejected: (state, action) => {
@@ -388,8 +389,15 @@ export const storageSlice = createAppSlice({
 
   extraReducers: (builder) => {
     // Сброс данных при выходе или потере авторизации
-    [logoutUser.fulfilled, deleteMe.fulfilled, unauthorizedError].forEach((action) => {
-      builder.addCase(action, (state) => Object.assign(state, initialState));
+    const resetActions = [
+      'auth/logout/fulfilled',
+      'auth/deleteMe/fulfilled',
+      unauthorizedError.type,
+    ];
+    resetActions.forEach((action) => {
+      builder.addCase(action, (state) => {
+        Object.assign(state, initialState);
+      });
     });
   },
 });

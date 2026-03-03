@@ -1,4 +1,5 @@
 import logging
+import os
 import uuid
 from typing import Any
 
@@ -152,3 +153,27 @@ def notify_file_delete(sender: Any, instance: File, **kwargs: Any) -> None:
 
     # Выполнение рассылки только после успешного завершения транзакции БД
     transaction.on_commit(send_updates)
+
+
+@receiver(post_delete, sender=File)
+def auto_delete_file_on_delete(sender, instance: File, **kwargs):
+    """
+    Удаляет файл и пустые родительские папки дат.
+    """
+    if not instance.file:
+        return
+
+    file_path = instance.file.path
+    if os.path.isfile(file_path):
+        os.remove(file_path)
+
+        directory = os.path.dirname(file_path)
+        for _ in range(3):
+            try:
+                if not os.listdir(directory):
+                    os.rmdir(directory)
+                    directory = os.path.dirname(directory)
+                else:
+                    break
+            except (OSError, FileNotFoundError):  # pragma: no cover
+                break

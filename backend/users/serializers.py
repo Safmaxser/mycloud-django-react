@@ -1,7 +1,8 @@
 from typing import TYPE_CHECKING, cast
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 if TYPE_CHECKING:
@@ -20,6 +21,7 @@ class UserBaseSerializer(serializers.ModelSerializer):
     files_total_size = serializers.IntegerField(read_only=True)
     storage_quota = serializers.SerializerMethodField()
     max_file_size = serializers.SerializerMethodField()
+    is_staff = serializers.BooleanField(required=False)
 
     class Meta:
         model = UserModel
@@ -28,6 +30,7 @@ class UserBaseSerializer(serializers.ModelSerializer):
             'username',
             'email',
             'full_name',
+            'is_staff',
             'date_joined',
             'updated_at',
             'files_count',
@@ -53,43 +56,6 @@ class UserBaseSerializer(serializers.ModelSerializer):
         """
         return settings.MAX_FILE_SIZE_BYTES
 
-
-class UserRegistrationSerializer(UserBaseSerializer):
-    """
-    Сериализатор для регистрации пользователей (пароль обязателен).
-    """
-
-    password = serializers.CharField(write_only=True, required=True)
-
-    class Meta(UserBaseSerializer.Meta):
-        fields = UserBaseSerializer.Meta.fields + ('password',)
-
-    def create(self, validated_data: dict) -> 'User':
-        """
-        Создает нового пользователя, используя метод create_user.
-        Это гарантирует корректное хеширование пароля.
-        """
-        user = UserModel.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data.get('email', ''),
-            password=validated_data['password'],
-            full_name=validated_data.get('full_name', ''),
-            is_staff=validated_data.get('is_staff', False),
-        )
-        return cast('User', user)
-
-
-class UserDetailSerializer(UserBaseSerializer):
-    """
-    Сериализатор для детального отображения данных пользователя
-    и безопасного редактирования профилей администратором.
-    """
-
-    is_staff = serializers.BooleanField(required=False)
-
-    class Meta(UserBaseSerializer.Meta):
-        fields = UserBaseSerializer.Meta.fields + ('is_staff',)
-
     def validate_is_staff(self, value: bool) -> bool:
         """
         Проверяем, имеет ли право текущий пользователь менять статус админа.
@@ -107,19 +73,48 @@ class UserDetailSerializer(UserBaseSerializer):
         return value
 
 
+class UserRegistrationSerializer(UserBaseSerializer):
+    """
+    Сериализатор для регистрации пользователей (пароль обязателен).
+    """
+
+    password = serializers.CharField(
+        write_only=True, required=True, validators=[validate_password]
+    )
+
+    class Meta(UserBaseSerializer.Meta):
+        fields = UserBaseSerializer.Meta.fields + ('password',)
+
+    def create(self, validated_data: dict) -> 'User':
+        """
+        Создает нового пользователя, используя метод create_user.
+        Это гарантирует корректное хеширование пароля.
+        """
+        validated_data['is_staff'] = False
+        return cast('User', UserModel.objects.create_user(**validated_data))
+
+
+class UserDetailSerializer(UserBaseSerializer):
+    """
+    Сериализатор для детального отображения данных пользователя
+    и безопасного редактирования профилей администратором.
+    """
+
+    pass
+
+
 class UserMeSerializer(UserBaseSerializer):
     """
     Сериализатор для работы со своим профилем.
     """
 
-    password = serializers.CharField(write_only=True, required=False)
+    password = serializers.CharField(
+        write_only=True, required=False, validators=[validate_password]
+    )
     is_staff = serializers.BooleanField(read_only=True)
 
     class Meta(UserBaseSerializer.Meta):
-        fields = UserBaseSerializer.Meta.fields + (
-            'password',
-            'is_staff',
-        )
+        fields = UserBaseSerializer.Meta.fields + ('password',)
 
     def update(self, instance: 'User', validated_data: dict) -> 'User':
         """
@@ -127,8 +122,30 @@ class UserMeSerializer(UserBaseSerializer):
         он хешируется перед сохранением.
         """
         password = validated_data.pop('password', None)
-        instance = super().update(instance, validated_data)
         if password:
             instance.set_password(password)
-            instance.save()
-        return instance
+        return super().update(instance, validated_data)
+
+
+class LoginSerializer(serializers.Serializer):
+    """
+    Сериализатор для валидации учетных данных при входе.
+    """
+
+    username = serializers.CharField(required=True)
+    password = serializers.CharField(write_only=True, required=True)
+
+    def validate(self, attrs):
+        username = attrs.get('username')
+        password = attrs.get('password')
+        user = authenticate(
+            request=self.context.get('request'), username=username, password=password
+        )
+
+        if not user:
+            raise serializers.ValidationError(
+                {'detail': 'Ошибка аутентификации: неверные учетные данные'},
+                code='authorization_failed',
+            )
+        attrs['user'] = user
+        return attrs

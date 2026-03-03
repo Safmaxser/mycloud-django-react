@@ -5,6 +5,7 @@
 Интегрирован с архитектурой DRF (API), Daphne (WebSockets) и Nginx (X-Accel-Redirect).
 """
 
+import sys
 from pathlib import Path
 
 import environ
@@ -247,3 +248,28 @@ MAX_FILE_SIZE_BYTES = int(env.int('MAX_FILE_SIZE_MB')) * 1024 * 1024  # type: ig
 FILE_SERVE_METHOD = str(env('FILE_SERVE_METHOD')).lower()
 if FILE_SERVE_METHOD not in ['django', 'nginx']:
     FILE_SERVE_METHOD = 'django'
+
+# --- Настройки для тестирования (автоматическое переключение) ---
+# Проверяем, запущены ли тесты через pytest
+IS_TESTING = 'pytest' in sys.modules or (len(sys.argv) > 1 and 'pytest' in sys.argv)
+if IS_TESTING:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    }
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'unique-snowflake',
+        }
+    }
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        },
+    }
+    PASSWORD_HASHERS = [
+        'django.contrib.auth.hashers.MD5PasswordHasher',
+    ]

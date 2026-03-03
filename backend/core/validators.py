@@ -23,20 +23,25 @@ class ComplexPasswordValidator:
                 'отсутствует заглавная буква'
             )
             raise ValidationError(
-                'Пароль должен содержать хотя бы одну заглавную букву.'
+                'Пароль должен содержать хотя бы одну заглавную букву.',
+                code='no_uppercase',
             )
 
         if not re.search(r'\d', password):
             logger.debug(
                 f'Валидация пароля отклонена для {username}: отсутствует цифра'
             )
-            raise ValidationError('Пароль должен содержать хотя бы одну цифру.')
+            raise ValidationError(
+                'Пароль должен содержать хотя бы одну цифру.', code='no_digit'
+            )
 
         if not re.search(r'[!@#$%^&*(),.?":{}|<>|_\-\[\]\'/\\+~]', password):
             logger.debug(
                 f'Валидация пароля отклонена для {username}: отсутствует спецсимвол'
             )
-            raise ValidationError('Пароль должен содержать хотя бы один спецсимвол.')
+            raise ValidationError(
+                'Пароль должен содержать хотя бы один спецсимвол.', code='no_special'
+            )
 
     def get_help_text(self):
         return 'Ваш пароль должен содержать заглавную букву, цифру и спецсимвол.'

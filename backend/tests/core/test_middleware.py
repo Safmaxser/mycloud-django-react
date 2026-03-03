@@ -1,85 +1,107 @@
 import logging
 
 import pytest
-from django.core.files.uploadedfile import SimpleUploadedFile
+from django.http import HttpResponseServerError
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.response import Response
+
+from users.views import UserViewSet
 
 
-def test_log_storage_success(client, user_factory, caplog):
+@pytest.mark.django_db
+class TestEventLoggingMiddleware:
     """
-    Проверка логгера 'storage' и записи INFO (ДЕЙСТВИЕ).
+    Тестирование системного логгера: проверка фиксации действий,
+    ошибок и определения метаданных (IP, User).
     """
-    user = user_factory()
-    client.force_authenticate(user=user)
-    url = reverse('storage:file-list')
-    test_file = SimpleUploadedFile('test.txt', b'content', content_type='text/plain')
-    response = client.post(
-        url, {'file': test_file, 'original_name': 'test.txt'}, format='multipart'
-    )
 
-    assert response.status_code == status.HTTP_201_CREATED
-    relevant = [r for r in caplog.records if url in r.message]
-    assert relevant[0].name == 'storage'
-    assert 'ДЕЙСТВИЕ' in relevant[0].message
+    def test_logging_info_on_action(self, client, user_factory, caplog):
+        """
+        Логирование успешного действия (POST).
+        """
+        user = user_factory()
+        client.force_authenticate(user=user)
+        url = reverse('users:user-list')
+        with caplog.at_level(logging.INFO, logger='users'):
+            payload = {
+                'username': 'newUserLog',
+                'password': 'Password123!',
+                'email': 'log@test.com',
+            }
+            response = client.post(url, payload)
+            assert response.status_code == status.HTTP_201_CREATED
+        assert 'ДЕЙСТВИЕ' in caplog.text
+        assert str(user) in caplog.text
+        assert '127.0.0.1' in caplog.text
 
+    def test_logging_info_on_download_path(
+        self, client, user_factory, file_factory, caplog
+    ):
+        """
+        Логирование GET-запроса, если в пути есть 'download'.
+        """
+        user = user_factory()
+        file_obj = file_factory(owner=user)
+        client.force_authenticate(user=user)
+        url = reverse('storage:file-download', kwargs={'pk': file_obj.pk})
+        with caplog.at_level(logging.INFO, logger='storage'):
+            response = client.get(url)
+            assert response.status_code == status.HTTP_200_OK
+        assert 'ДЕЙСТВИЕ' in caplog.text
+        assert 'GET' in caplog.text
 
-def test_log_users_warning(client, caplog):
-    """
-    Проверка логгера 'users' и записи WARNING (ОШИБКА КЛИЕНТА).
-    """
-    url = reverse('users:login')
-    response = client.get(url)
+    def test_logging_skips_common_get_request(self, client, user_factory, caplog):
+        """
+        Проверка "тихого" режима для обычных GET-запросов (просмотр профиля).
+        """
+        user = user_factory()
+        client.force_authenticate(user=user)
+        url = reverse('users:user-me')
+        with caplog.at_level(logging.INFO, logger='users'):
+            response = client.get(url)
+            assert response.status_code == status.HTTP_200_OK
+        assert 'ДЕЙСТВИЕ' not in caplog.text
+        assert 'ОШИБКА' not in caplog.text
 
-    assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
-    relevant = [r for r in caplog.records if url in r.message]
-    assert relevant[0].name == 'users'
-    assert 'ОШИБКА КЛИЕНТА' in relevant[0].message
+    def test_logging_warning_on_client_error(self, client, caplog):
+        """
+        Логирование ошибок 4xx и извлечение IP из X-Forwarded-For.
+        """
+        headers = {'HTTP_X_FORWARDED_FOR': '192.168.1.1, 10.0.0.1'}
+        with caplog.at_level(logging.WARNING, logger='django'):
+            response = client.get('/non-existent-path/', **headers)
+            assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert 'ОШИБКА КЛИЕНТА' in caplog.text
+        assert 'IP: 192.168.1.1' in caplog.text
+        assert 'User: Anonymous' in caplog.text
 
+    def test_logging_error_on_server_error(
+        self, client, caplog, monkeypatch, user_factory
+    ):
+        """
+        Логирование критических ошибок 5xx.
+        """
 
-def test_log_django_fallback(client, caplog):
-    """
-    Проверка fallback на логгер 'django' при несуществующем пути.
-    """
-    url = '/api/non-existent-path/'
-    response = client.get(url)
+        def mock_500(*args, **kwargs):
+            return HttpResponseServerError('Server Broken')
 
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-    relevant = [r for r in caplog.records if url in r.message]
-    assert relevant[0].name == 'django'
-    assert '404' in relevant[0].message
+        monkeypatch.setattr(UserViewSet, 'dispatch', mock_500)
+        user = user_factory()
+        client.force_authenticate(user=user)
+        url = reverse('users:user-list')
+        with caplog.at_level(logging.ERROR, logger='users'):
+            response = client.get(url)
+            assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        assert 'СЕРВЕРНАЯ ОШИБКА' in caplog.text
+        assert '500: GET' in caplog.text
 
-
-def test_middleware_logging_x_forwarded_for(client, caplog):
-    """
-    Проверка обработки заголовка X-Forwarded-For.
-    Проверка, что Middleware записывает правильный IP в текст лога.
-    """
-    caplog.set_level(logging.WARNING)
-    test_ip = '192.168.1.1'
-
-    response = client.get(
-        reverse('users:login'), HTTP_X_FORWARDED_FOR=f'{test_ip}, 10.0.0.1'
-    )
-    assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
-    assert test_ip in caplog.text
-    assert 'ОШИБКА КЛИЕНТА' in caplog.text
-
-
-def test_middleware_logging_server_error(client, caplog):
-    """
-    Тестирование логирования критических ошибок (500) в Middleware.
-    """
-    caplog.set_level(logging.ERROR)
-    with pytest.MonkeyPatch().context() as m:
-        m.setattr(
-            'users.views.JsonLoginView.post',
-            lambda *args, **kwargs: Response(status=500),
-        )
-        response = client.post(reverse('users:login'))
-
-    assert response.status_code == 500
-    relevant = [r for r in caplog.records if 'СЕРВЕРНАЯ ОШИБКА' in r.message]
-    assert len(relevant) > 0
-    assert relevant[0].levelname == 'ERROR'
+    def test_logging_resolver_404_fallback(self, client, caplog):
+        """
+        Проверка fallback-логгера ('django'), если путь не резолвится.
+        """
+        with caplog.at_level(logging.WARNING, logger='django'):
+            response = client.get('/invalid/path/that/does/not/resolve/')
+            assert response.status_code == status.HTTP_404_NOT_FOUND
+        for record in caplog.records:
+            if 'ОШИБКА КЛИЕНТА' in record.message:
+                assert record.name == 'django'

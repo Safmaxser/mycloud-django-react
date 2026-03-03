@@ -6,7 +6,11 @@ export const formatBytes = (bytes: number | null | undefined, decimals: number =
   const dm = decimals < 0 ? 0 : decimals;
   const sizes = ['Байт', 'КБ', 'МБ', 'ГБ', 'ТБ'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  const value = bytes / Math.pow(k, i);
+  const formattedValue = (
+    Math.round((value + Number.EPSILON) * Math.pow(10, dm)) / Math.pow(10, dm)
+  ).toFixed(dm);
+  return parseFloat(formattedValue) + ' ' + sizes[i];
 };
 
 /** Преобразует ISO-дату в локальный формат (ДД.ММ.ГГГГ ЧЧ:ММ). */
