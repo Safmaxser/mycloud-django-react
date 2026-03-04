@@ -165,7 +165,7 @@ export function FileCellActions({ file }: FileCellActionsProps) {
         <div
           className={cn(
             'pointer-events-none absolute right-2 transition-opacity duration-200',
-            isDownloading ? 'opacity-0' : 'opacity-100 group-hover:opacity-0',
+            isDownloading || isPreviewing ? 'opacity-0' : 'opacity-100 group-hover:opacity-0',
           )}
         >
           <MoreVertical className="h-5 w-5 text-gray-300" />

@@ -1,14 +1,20 @@
-# GitHub Actions Workflow для автоматизации тестирования и проверки качества кода (CI).
-# Включает в себя: Линтинг (Ruff, ESLint), Проверку стиля (Prettier),
-# Unit/Integration тесты (Pytest, Vitest) и проверку сборки (Vite).
+# GitHub Actions Workflow: Full CI/CD Lifecycle (v1.4-production)
+# ---------------------------------------------------------------
+# 1. CI (Continuous Integration):
+#    - Backend: Python 3.13, Django 6.0, Ruff (Lint/Format), Pytest + Coverage.
+#    - Frontend: Node 20, React 19, ESLint, Vitest, Vite Build Check.
+# 2. CD (Continuous Deployment):
+#    - Автоматическое развертывание на сервер Reg.ru через SSH.
+#    - Обновление контейнеров Docker & конфигурации Traefik.
 
-name: CI Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   # --- BACKEND: Проверка Python/Django инфраструктуры ---
@@ -107,3 +113,24 @@ jobs:
 
       - name: Build Check (Vite)
         run: yarn build
+
+  # --- DEPLOY: Автоматический деплой на сервер Reg.ru ---
+  deploy:
+    name: Deploy to Production
+    needs: [backend-ci, frontend-ci]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Execute remote ssh commands
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/mycloud-django-react
+            git fetch origin main
+            git reset --hard origin/main
+            docker compose up -d --build
+            docker system prune -f

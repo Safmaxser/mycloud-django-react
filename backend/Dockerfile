@@ -11,4 +11,11 @@ COPY backend/pyproject.toml backend/uv.lock ./
 RUN uv sync --frozen --no-dev --no-cache
 COPY backend/ .
 EXPOSE 8000
-CMD ["uv", "run", "gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD [ \
+    "uv", "run", "uvicorn", "core.asgi:application", \
+    "--host", "0.0.0.0", \
+    "--port", "8000", \
+    "--proxy-headers", \
+    "--forwarded-allow-ips=*", \
+    "--log-level", "warning" \
+]

@@ -20,6 +20,9 @@ env = environ.Env(
     CSRF_TRUSTED_ORIGINS=(list, []),
     SESSION_COOKIE_DOMAIN=(str, ''),
     CSRF_COOKIE_DOMAIN=(str, ''),
+    SESSION_COOKIE_SECURE=(bool, True),
+    CSRF_COOKIE_SECURE=(bool, True),
+    SITE_PROTOCOL=(str, 'https'),
     STORAGE_QUOTA_MB=(int, 2048),
     MAX_FILE_SIZE_MB=(int, 500),
     FILE_SERVE_METHOD=(str, 'django'),
@@ -28,10 +31,33 @@ env = environ.Env(
 
 environ.Env.read_env(BASE_DIR.parent / '.env')
 
-# Основные параметры безопасности
+# --- Основные параметры безопасности ---
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
+
+# --- Настройки CORS и CSRF (Безопасность SPA) ---
+CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS')
+CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS')
+
+# --- Параметры Cookies (настроены на SameSite=Lax для работы SPA в одном домене) ---
+SESSION_COOKIE_DOMAIN = env('SESSION_COOKIE_DOMAIN') or None
+CSRF_COOKIE_DOMAIN = env('CSRF_COOKIE_DOMAIN') or None
+SESSION_COOKIE_SECURE = env('SESSION_COOKIE_SECURE')
+CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE')
+CSRF_COOKIE_HTTPONLY = False  # Позволяет фронтенду (Axios) читать CSRF-токен
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+# --- Настройки проксирования (Reverse Proxy Settings) ---
+SITE_PROTOCOL = env('SITE_PROTOCOL')
+if SITE_PROTOCOL == 'https':
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+else:
+    SECURE_PROXY_SSL_HEADER = None
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
 
 # --- Определение состава приложений ---
 INSTALLED_APPS = [
@@ -71,22 +97,6 @@ MIDDLEWARE = [
 
 if DEBUG:
     MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
-
-ROOT_URLCONF = 'core.urls'
-
-# --- Настройки CORS и CSRF (Безопасность SPA) ---
-CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS')
-CORS_ALLOW_CREDENTIALS = True
-CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS')
-
-# Параметры Cookies (настроены на SameSite=Lax для работы SPA в одном домене)
-SESSION_COOKIE_DOMAIN = env('SESSION_COOKIE_DOMAIN')
-CSRF_COOKIE_DOMAIN = env('CSRF_COOKIE_DOMAIN')
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_HTTPONLY = False  # Позволяет фронтенду (Axios) читать CSRF-токен
-CSRF_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_SAMESITE = 'Lax'
 
 # --- Django REST Framework (API) ---
 REST_FRAMEWORK = {
@@ -223,6 +233,7 @@ LOGGING = {
 }
 
 # --- Точки входа и Статика ---
+ROOT_URLCONF = 'core.urls'
 WSGI_APPLICATION = 'core.wsgi.application'
 ASGI_APPLICATION = 'core.asgi.application'
 
