@@ -13,7 +13,7 @@ export function SearchResultsInfo({ search, count, className }: SearchResultsInf
   return (
     <div
       className={cn(
-        'animate-in fade-in slide-in-from-left-4 right-70 absolute top-0 flex items-center gap-3 duration-300',
+        'animate-in fade-in slide-in-from-left-4 absolute right-[20%] top-0 flex items-center gap-3 duration-300',
         className,
       )}
     >

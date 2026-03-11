@@ -25,10 +25,10 @@ export function HeaderContent({ userId }: HeaderContentProps) {
           <div className="flex flex-1 items-center justify-between gap-4">
             <Link
               to={ROUTES.ADMIN}
-              className="flex items-center gap-1 text-sm font-bold text-blue-600 transition-colors hover:text-blue-700"
+              className="flex items-center gap-1 rounded-full bg-blue-100 p-1 text-sm font-bold text-blue-600 transition-colors hover:text-blue-700 lg:bg-transparent"
             >
               <ChevronLeft className="h-4 w-4" />
-              Назад к пользователям
+              <span className="hidden lg:block">Назад к пользователям</span>
             </Link>
             <OtherUser userId={userId} />
           </div>

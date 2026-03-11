@@ -21,7 +21,9 @@ export function AdminPage() {
   return (
     <MainLayout
       headerContent={
-        <h1 className="text-2xl font-bold text-gray-800">Управление пользователями</h1>
+        <h1 className="text-center text-lg font-bold text-gray-800 lg:text-2xl">
+          Управление пользователями
+        </h1>
       }
       searchInput={
         <SearchInput value={search} onSearch={handleSearch} placeholder="Поиск пользователей..." />

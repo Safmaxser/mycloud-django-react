@@ -43,7 +43,7 @@ export function SidebarButton<T extends ElementType = 'button'>({
         }
       >
         <Icon className="h-5 w-5 shrink-0" />
-        <span>{label}</span>
+        <span className="hidden lg:block">{label}</span>
       </NavLink>
     );
   }
@@ -58,7 +58,7 @@ export function SidebarButton<T extends ElementType = 'button'>({
       )}
     >
       <Icon className="h-5 w-5 shrink-0" />
-      <span>{label}</span>
+      <span className="hidden lg:block">{label}</span>
     </Component>
   );
 }

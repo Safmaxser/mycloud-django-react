@@ -27,7 +27,7 @@ export function BaseModal({ onClose, className, children }: PropsWithChildren<Ba
     <div className="animate-in fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm duration-300">
       <div
         className={cn(
-          'animate-in zoom-in-95 rounded-4xl relative flex w-full max-w-lg flex-col overflow-hidden bg-white p-8 shadow-2xl duration-300',
+          'animate-in zoom-in-95 rounded-4xl relative flex w-full flex-col overflow-hidden bg-white shadow-2xl duration-300',
           className,
         )}
       >

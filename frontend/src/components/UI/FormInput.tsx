@@ -7,15 +7,16 @@ interface FormInputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   icon?: LucideIcon | null;
   error?: string;
+  classNameBlock?: string;
 }
 
 /** Универсальное поле ввода с поддержкой иконок, меток и отображения ошибок валидации. */
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
-  ({ label, icon: Icon, error, className, ...props }, ref) => {
+  ({ label, icon: Icon, error, classNameBlock, className, ...props }, ref) => {
     const id = useId();
 
     return (
-      <div className="w-full">
+      <div className={cn('w-full', classNameBlock)}>
         {label && (
           <label htmlFor={id} className="mb-1 ml-0.5 block text-sm font-bold text-gray-500">
             {label}

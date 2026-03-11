@@ -7,7 +7,7 @@ import { FileRow } from './FileRow';
 import { SortHeader } from '../../UI/SortHeader';
 
 export const FILE_TABLE_COLUMNS: readonly TableColumn[] = [
-  { label: 'Название', field: 'original_name', className: 'justify-start' },
+  { label: 'Название файла', field: 'original_name', className: 'justify-start' },
   { label: 'Размер', field: 'size' },
   { label: 'Дата', field: 'created_at' },
   { label: 'Скачивания', field: 'download_count' },
@@ -29,7 +29,7 @@ export function FileTable({ files }: FileTableProps) {
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white font-sans text-gray-900 shadow-sm">
-      <div className="row-files-table sticky top-0 z-10 rounded-2xl border-b border-gray-100 bg-gray-50/80 backdrop-blur-md">
+      <div className="row-files-title sticky top-0 z-10 rounded-2xl border-b border-gray-100 bg-gray-50/80 backdrop-blur-md">
         {FILE_TABLE_COLUMNS.map((col) => (
           <SortHeader
             key={col.label}

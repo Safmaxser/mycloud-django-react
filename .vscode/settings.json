@@ -7,9 +7,13 @@
     "tests"
   ],
   "python.testing.cwd": "${workspaceFolder}/backend",
+  "vitest.configFile": "frontend/vitest.config.ts",
+  "vitest.workspace": "frontend",
+  "vitest.workingDirectory": "frontend",
+  "vitest.commandLine": "npx vitest",
   "coverage-gutters.coverageFileNames": [
-    "backend/coverage.xml",
     "frontend/coverage/lcov.info",
+    "backend/coverage.xml",
     "coverage.xml"
   ],
   "coverage-gutters.showLineCoverage": true,

@@ -45,7 +45,7 @@ export function UserListSection() {
 
   if (error && !loading && users.length === 0) {
     return (
-      <div className="flex h-full flex-col p-7">
+      <div className="flex h-full flex-col p-3 pt-7 lg:p-7">
         <EmptyState
           title="Произошла ошибка"
           description={error}
@@ -65,7 +65,7 @@ export function UserListSection() {
 
   if (users.length === 0 && search === '' && !loading) {
     return (
-      <div className="flex h-full flex-col p-7">
+      <div className="flex h-full flex-col p-3 pt-7 lg:p-7">
         <EmptyState
           title="Пользователей пока нет"
           description="Новые пользователи появятся здесь после регистрации."
@@ -77,7 +77,7 @@ export function UserListSection() {
 
   if (users.length === 0 && search !== '' && !loading) {
     return (
-      <div className="relative flex h-full flex-col p-7">
+      <div className="relative flex h-full flex-col p-3 pt-7 lg:p-7">
         <SearchResultsInfo search={search} count={totalCount} />
         <EmptyState
           title="Ничего не найдено"
@@ -89,14 +89,12 @@ export function UserListSection() {
   }
 
   return (
-    <div className="custom-scrollbar relative flex h-full flex-col gap-6 overflow-y-auto p-7">
+    <div className="custom-scrollbar relative flex h-full flex-col gap-6 overflow-y-auto p-3 pt-7 lg:p-7">
       <SearchResultsInfo search={search} count={totalCount} />
       <div className="flex-1">
         <UserTable users={users} />
       </div>
-      <div className="sticky bottom-0 rounded-2xl border-b border-gray-100 bg-gray-50/80 py-2 backdrop-blur-md">
-        <Pagination current={page} total={totalCount} onChange={handlePageChange} />
-      </div>
+      <Pagination current={page} total={totalCount} onChange={handlePageChange} />
     </div>
   );
 }

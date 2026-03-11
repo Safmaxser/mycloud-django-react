@@ -21,18 +21,18 @@ export function MainLayout({
   children,
 }: PropsWithChildren<MainLayoutProps>) {
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-dvh overflow-hidden bg-gray-50">
       <Sidebar />
       <div className="relative flex flex-1 flex-col overflow-hidden bg-white">
-        <header className="h-18 relative flex shrink-0 items-center justify-between gap-6 border-b border-gray-200 bg-white px-8">
-          <div className="flex flex-1 items-center gap-6">{headerContent}</div>
+        <header className="h-18 relative flex shrink-0 items-center justify-between gap-6 border-b border-gray-200 bg-white px-4 lg:px-8">
+          <div className="flex flex-1 items-center gap-2 lg:gap-6">{headerContent}</div>
           <div className="flex w-full max-w-2xl items-center gap-4">
             {searchInput}
             <div className="mx-2 h-8 w-px bg-gray-100" />
             <UserMenu />
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto bg-gray-50/30 p-1">{children}</main>
+        <main className="flex-1 overflow-hidden bg-gray-50/30 p-1">{children}</main>
       </div>
     </div>
   );

@@ -74,7 +74,7 @@ export function FileUpload() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold text-gray-800">Мои файлы</h1>
+      <h1 className="text-center text-lg font-bold text-gray-800 lg:text-2xl">Мои файлы</h1>
       <div className="flex items-center">
         <input
           type="file"
@@ -92,6 +92,7 @@ export function FileUpload() {
           label="Загрузить файл"
           loading={isUploading}
           loadingLabel={`Загрузка ${uploadProgress}%`}
+          classNameLabel="hidden xl:block"
         />
         {pendingFile && (
           <UploadConfirmModal

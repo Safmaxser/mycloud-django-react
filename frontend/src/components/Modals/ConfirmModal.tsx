@@ -28,7 +28,7 @@ export function ConfirmModal({
   if (!isOpen) return null;
 
   return (
-    <BaseModal onClose={onClose} className="max-w-sm">
+    <BaseModal className="max-w-sm p-8" onClose={onClose}>
       <div className="flex flex-col">
         <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-500">
           <AlertTriangle className="h-8 w-8" />

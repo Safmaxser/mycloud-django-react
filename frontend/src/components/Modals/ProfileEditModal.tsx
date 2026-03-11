@@ -147,15 +147,18 @@ export function ProfileEditModal({ userId, onClose }: ProfileEditModalProps) {
   }, []);
 
   return (
-    <BaseModal onClose={onClose}>
-      <div className="mb-8 flex flex-col items-center text-gray-700">
+    <BaseModal
+      className="max-w-lg gap-6 p-8 landscape:max-w-3xl landscape:gap-4 landscape:p-6 landscape:lg:max-w-lg landscape:lg:gap-6 landscape:lg:p-8"
+      onClose={onClose}
+    >
+      <div className="flex flex-col items-center text-gray-700">
         <h3 className="text-4xl font-black tracking-tight">Настройки</h3>
         <p className="text-sm font-black tracking-[0.2em] text-gray-400">{title}</p>
       </div>
 
-      <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-x-4 gap-y-6 landscape:grid-cols-2 landscape:lg:grid-cols-1">
         {user?.is_staff && (
-          <div className="flex items-center justify-center gap-2 rounded-2xl border border-orange-100/50 bg-orange-50 px-4 py-2.5 text-orange-600">
+          <div className="col-span-1 flex items-center justify-center gap-2 rounded-2xl border border-orange-100/50 bg-orange-50 px-4 py-2.5 text-orange-600 landscape:col-span-2 landscape:lg:col-span-1">
             <ShieldCheck className="h-5 w-5" />
             <span className="text-xs font-black uppercase tracking-widest">Администратор</span>
           </div>
@@ -175,34 +178,35 @@ export function ProfileEditModal({ userId, onClose }: ProfileEditModalProps) {
             />
           ),
         )}
+        {isAdminMode && (
+          <div className="flex items-center gap-3 rounded-2xl bg-blue-50/50 p-4 ring-1 ring-blue-100">
+            <input
+              id="is_staff_checkbox"
+              type="checkbox"
+              checked={formData.is_staff}
+              onChange={(e) => setFormData({ ...formData, is_staff: e.target.checked })}
+              className="h-5 w-5 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <label htmlFor="is_staff_checkbox" className="cursor-pointer">
+              <span className="block text-sm font-black text-blue-900">Права администратора</span>
+              <span className="block text-[0.7rem] text-blue-400 landscape:text-[0.5rem] landscape:lg:text-[0.7rem]">
+                Разрешить управление другими пользователями
+              </span>
+            </label>
+          </div>
+        )}
       </div>
-      {isAdminMode && (
-        <div className="mt-4 flex items-center gap-3 rounded-2xl bg-blue-50/50 p-4 ring-1 ring-blue-100">
-          <input
-            id="is_staff_checkbox"
-            type="checkbox"
-            checked={formData.is_staff}
-            onChange={(e) => setFormData({ ...formData, is_staff: e.target.checked })}
-            className="h-5 w-5 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-          />
-          <label htmlFor="is_staff_checkbox" className="cursor-pointer">
-            <span className="block text-sm font-black text-blue-900">Права администратора</span>
-            <span className="block text-[10px] text-blue-400">
-              Разрешить управление другими пользователями
-            </span>
-          </label>
-        </div>
-      )}
 
-      <div className="mt-8 flex flex-col gap-3">
+      <div className="flex w-full flex-col gap-2 landscape:flex-row landscape:lg:flex-col">
         <ButtonStandard
           disabled={!isChanged || isUpdating}
+          className="w-full"
           onClick={handleSave}
           loading={isUpdating}
           icon={Save}
           label="Обновить данные"
         />
-        <button onClick={onClose} className="btn-non-priority">
+        <button onClick={onClose} className="btn-non-priority w-full">
           Отмена
         </button>
       </div>

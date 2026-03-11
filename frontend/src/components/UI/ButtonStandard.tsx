@@ -13,6 +13,7 @@ interface ButtonStandardProps<T extends ElementType = 'button'> {
   /** Текст, заменяющий основной label в процессе загрузки */
   loadingLabel?: string | null;
   classNameIcon?: string | null;
+  classNameLabel?: string | null;
   /** Если true — иконка отображается после текста */
   swap?: boolean;
 }
@@ -32,6 +33,7 @@ export function ButtonStandard<T extends ElementType = 'button'>({
   label,
   loadingLabel,
   classNameIcon,
+  classNameLabel,
   swap = false,
   className,
   ...props
@@ -41,25 +43,33 @@ export function ButtonStandard<T extends ElementType = 'button'>({
 
   const labelIconLoading = swap ? (
     <>
-      {loadingLabel ? <span>{loadingLabel}</span> : <span>{label}</span>}
+      {loadingLabel ? (
+        <span className={cn(classNameLabel)}>{loadingLabel}</span>
+      ) : (
+        <span className={cn(classNameLabel)}>{label}</span>
+      )}
       <Loader2 className="h-4 w-4 animate-spin" />
     </>
   ) : (
     <>
       <Loader2 className="h-4 w-4 animate-spin" />
-      {loadingLabel ? <span>{loadingLabel}</span> : <span>{label}</span>}
+      {loadingLabel ? (
+        <span className={cn(classNameLabel)}>{loadingLabel}</span>
+      ) : (
+        <span className={cn(classNameLabel)}>{label}</span>
+      )}
     </>
   );
 
   const labelIcon = swap ? (
     <>
-      <span>{label}</span>
+      <span className={cn(classNameLabel)}>{label}</span>
       {Icon && <Icon className={cn('h-4 w-4', classNameIcon)} />}
     </>
   ) : (
     <>
       {Icon && <Icon className={cn('h-4 w-4', classNameIcon)} />}
-      <span>{label}</span>
+      <span className={cn(classNameLabel)}>{label}</span>
     </>
   );
 

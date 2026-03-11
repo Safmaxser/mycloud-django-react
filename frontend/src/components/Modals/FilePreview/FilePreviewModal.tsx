@@ -72,8 +72,8 @@ export function FilePreviewModal({ file: initialFile, url, onClose }: FilePrevie
   };
 
   return (
-    <BaseModal className="max-w-6xl p-0" onClose={onClose}>
-      <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-gray-100 bg-white/80 p-5 backdrop-blur-md">
+    <BaseModal className="max-w-7xl portrait:max-w-full portrait:lg:max-w-7xl" onClose={onClose}>
+      <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-gray-100 bg-white/80 p-5">
         <div className="rounded-xl bg-blue-50 p-2 text-blue-600">
           <FileIcon file={file} className="h-5 w-5" />
         </div>
@@ -83,38 +83,39 @@ export function FilePreviewModal({ file: initialFile, url, onClose }: FilePrevie
           </h3>
         </div>
       </header>
-      <div className="flex h-full max-h-[85vh] flex-col overflow-hidden md:flex-row">
-        <div className="flex flex-1 items-center justify-center overflow-y-auto bg-gray-900/5 p-4 sm:p-8">
+      <div className="flex max-h-[70vh] flex-row overflow-hidden portrait:flex-col portrait:lg:flex-row">
+        <div className="flex flex-1 items-center justify-center overflow-y-auto bg-gray-900/5 p-4 lg:p-8">
           <FilePreviewContent file={file} url={url} />
         </div>
-        <aside className="md:w-90 w-full shrink-0 overflow-y-auto border-l border-gray-100 bg-gray-50/50 p-6">
-          <div className="space-y-5">
-            <FormInput
-              label="Имя файла"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-            />
-            <FormTextArea
-              label="Комментарий"
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Добавьте описание..."
-            />
-            <ButtonStandard
-              disabled={!isChanged}
-              onClick={handleSave}
-              className="btn-green w-full"
-              icon={Save}
-              label="Сохранить"
-            />
-            <div className="flex items-start gap-3 border-t border-gray-100 pt-4">
+        <aside className="flex w-[30%] shrink-0 flex-col justify-between gap-2 overflow-y-auto border-l border-gray-100 bg-gray-50/50 p-4 lg:gap-6 lg:p-6 portrait:w-full portrait:lg:w-[30%]">
+          <FormInput
+            label="Имя файла"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+          />
+          <FormTextArea
+            label="Комментарий"
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            placeholder="Добавьте описание..."
+          />
+          <ButtonStandard
+            disabled={!isChanged}
+            onClick={handleSave}
+            className="btn-green w-full"
+            icon={Save}
+            label="Сохранить"
+          />
+          <div className="border-t border-gray-100" />
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
               <HardDrive className="mt-0.5 h-4 w-4 text-blue-500" strokeWidth={2.5} />
               <div className="flex flex-col gap-1">
                 <span className="text-sm font-bold text-gray-500">Размер</span>
                 <span className="text-sm font-black text-gray-600">{formatBytes(file.size)}</span>
               </div>
             </div>
-            <div className="mb-10 flex items-start gap-3">
+            <div className="flex items-start gap-3">
               <Calendar className="mt-0.5 h-4 w-4 text-purple-500" strokeWidth={2.5} />
               <div className="flex flex-col gap-1">
                 <span className="text-sm font-bold text-gray-500">Загружен</span>

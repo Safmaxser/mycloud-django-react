@@ -16,29 +16,31 @@ export function Pagination({ current, total, onChange }: PaginationProps) {
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-center gap-4">
-      <ButtonStandard
-        type="button"
-        disabled={current === 1}
-        onClick={() => onChange(current - 1)}
-        classNameIcon="transition-transform group-hover:-translate-x-0.5"
-        className="btn-blue-light w-30 py-1"
-        icon={ChevronLeft}
-        label="Назад"
-      />
-      <span className="text-xs font-black uppercase tracking-widest text-gray-400">
-        Страница {current} из {totalPages}
-      </span>
-      <ButtonStandard
-        type="button"
-        disabled={current === totalPages}
-        onClick={() => onChange(current + 1)}
-        classNameIcon="transition-transform group-hover:translate-x-0.5"
-        className="btn-blue-light w-30 py-1"
-        icon={ChevronRight}
-        label="Вперёд"
-        swap={true}
-      />
+    <div className="sticky bottom-0 rounded-2xl border-b border-gray-100 bg-gray-50/80 py-2 backdrop-blur-md">
+      <div className="flex items-center justify-center gap-4">
+        <ButtonStandard
+          type="button"
+          disabled={current === 1}
+          onClick={() => onChange(current - 1)}
+          classNameIcon="transition-transform group-hover:-translate-x-0.5"
+          className="btn-blue-light w-30 py-1"
+          icon={ChevronLeft}
+          label="Назад"
+        />
+        <span className="text-xs font-black uppercase tracking-widest text-gray-400">
+          Страница {current} из {totalPages}
+        </span>
+        <ButtonStandard
+          type="button"
+          disabled={current === totalPages}
+          onClick={() => onChange(current + 1)}
+          classNameIcon="transition-transform group-hover:translate-x-0.5"
+          className="btn-blue-light w-30 py-1"
+          icon={ChevronRight}
+          label="Вперёд"
+          swap={true}
+        />
+      </div>
     </div>
   );
 }

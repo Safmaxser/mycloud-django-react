@@ -119,57 +119,57 @@ export function FileCellActions({ file }: FileCellActionsProps) {
 
   return (
     <div className="col-table justify-end">
-      <div className="relative flex h-9 items-center justify-end">
-        <div
+      <div
+        className={cn(
+          'h-9 items-center justify-end gap-1 transition-all duration-200 group-hover:flex group-hover:opacity-100',
+          isDownloading || isPreviewing
+            ? 'flex opacity-100'
+            : 'flex opacity-100 lg:hidden lg:opacity-0',
+        )}
+      >
+        <ButtonAction
+          onClick={handleView}
+          className="bg-green-100 text-green-600 lg:bg-transparent lg:text-gray-400 lg:hover:text-green-600"
+          title="Просмотреть"
+          icon={Eye}
+          progress={previewingProgress}
+        />
+        <ButtonAction
+          onClick={handleDownload}
+          className="bg-indigo-100 text-indigo-600 lg:bg-transparent lg:text-gray-400 lg:hover:text-indigo-600"
+          title="Скачать"
+          icon={Download}
+          iconLoading={ArrowDown}
+          progress={downloadProgress}
+        />
+        <ButtonAction
+          disabled={isDownloading || isPreviewing}
+          onClick={() => setDeleteId(file.id)}
+          className="bg-red-100 text-red-600 disabled:cursor-not-allowed disabled:opacity-30 lg:bg-transparent lg:text-gray-400 lg:hover:text-red-600"
+          title="Удалить"
+          icon={Trash2}
+        />
+        <ButtonAction
+          onClick={() =>
+            hasLink ? dispatch(revokeShareLink(file.id)) : dispatch(generateShareLink(file.id))
+          }
           className={cn(
-            'flex gap-1 transition-all duration-200',
-            isDownloading || isPreviewing
-              ? 'visible opacity-100'
-              : 'invisible opacity-0 group-hover:visible group-hover:opacity-100',
+            'btn-file-control text-gray-400',
+            hasLink
+              ? 'bg-blue-100 text-blue-600 lg:bg-transparent lg:text-gray-400 lg:hover:text-blue-600'
+              : 'bg-amber-100 text-amber-600 lg:bg-transparent lg:text-gray-400 lg:hover:text-amber-600',
           )}
-        >
-          <ButtonAction
-            onClick={handleView}
-            className="hover:text-green-600"
-            title="Просмотреть"
-            icon={Eye}
-            progress={previewingProgress}
-          />
-          <ButtonAction
-            onClick={handleDownload}
-            className="hover:text-blue-600"
-            title="Скачать"
-            icon={Download}
-            iconLoading={ArrowDown}
-            progress={downloadProgress}
-          />
-          <ButtonAction
-            disabled={isDownloading || isPreviewing}
-            onClick={() => setDeleteId(file.id)}
-            className="hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-30"
-            title="Удалить"
-            icon={Trash2}
-          />
-          <ButtonAction
-            onClick={() =>
-              hasLink ? dispatch(revokeShareLink(file.id)) : dispatch(generateShareLink(file.id))
-            }
-            className={cn(
-              'btn-file-control text-gray-400',
-              hasLink ? 'hover:text-green-600' : 'hover:text-blue-600',
-            )}
-            title={hasLink ? 'Закрыть доступ' : 'Открыть доступ по ссылке'}
-            icon={hasLink ? Unlock : Lock}
-          />
-        </div>
-        <div
-          className={cn(
-            'pointer-events-none absolute right-2 transition-opacity duration-200',
-            isDownloading || isPreviewing ? 'opacity-0' : 'opacity-100 group-hover:opacity-0',
-          )}
-        >
-          <MoreVertical className="h-5 w-5 text-gray-300" />
-        </div>
+          title={hasLink ? 'Закрыть доступ' : 'Открыть доступ по ссылке'}
+          icon={hasLink ? Unlock : Lock}
+        />
+      </div>
+      <div
+        className={cn(
+          'justify-end lg:group-hover:hidden',
+          isDownloading || isPreviewing ? 'hidden' : 'hidden lg:flex',
+        )}
+      >
+        <MoreVertical className="h-5 w-5 text-gray-300" />
       </div>
       {previewData && (
         <FilePreviewModal file={previewData.file} url={previewData.url} onClose={closePreview} />

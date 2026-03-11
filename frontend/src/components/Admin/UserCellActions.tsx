@@ -41,34 +41,34 @@ export function UserCellActions({ user }: UserCellActionsProps) {
 
   return (
     <div className="col-table justify-end">
-      <div className="hidden justify-end gap-1 opacity-0 transition-all duration-200 group-hover:visible group-hover:flex group-hover:opacity-100">
+      <div className="flex h-9 items-center justify-end gap-1 opacity-100 transition-all duration-200 group-hover:flex group-hover:opacity-100 lg:hidden lg:opacity-0">
         <ButtonAction
           as={Link}
           to={getAdminFilesPath(user.id)}
-          className="hover:text-blue-600"
+          className="bg-blue-100 text-blue-600 lg:bg-transparent lg:text-gray-400 lg:hover:text-blue-600"
           title="Просмотреть файлы"
           icon={FolderOpen}
         />
         <ButtonAction
           onClick={() => setIsEditOpen(true)}
-          className="hover:text-green-600"
+          className="bg-green-100 text-green-600 lg:bg-transparent lg:text-gray-400 lg:hover:text-green-600"
           title="Изменить профиль"
           icon={UserPen}
         />
         <ButtonAction
           onClick={() => handleToggleAdmin(user.id, user.is_staff)}
-          className="hover:text-purple-600"
+          className="bg-purple-100 text-purple-600 lg:bg-transparent lg:text-gray-400 lg:hover:text-purple-600"
           title="Настроить права"
           icon={ShieldAlert}
         />
         <ButtonAction
           onClick={() => setUserDeleted(user)}
-          className="hover:text-red-600"
+          className="bg-red-100 text-red-600 lg:bg-transparent lg:text-gray-400 lg:hover:text-red-600"
           title="Удалить аккаунт"
           icon={Trash2}
         />
       </div>
-      <div className="flex justify-end group-hover:hidden">
+      <div className="hidden justify-end lg:flex lg:group-hover:hidden">
         <UserIcon className="h-5 w-5 text-gray-200" />
       </div>
       <ConfirmModal

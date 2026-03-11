@@ -149,7 +149,11 @@ export const authSlice = createAppSlice({
       async (userData, { rejectWithValue, signal }) => {
         try {
           const cleanData = Object.fromEntries(
-            Object.entries(userData).filter(([k, v]) => v !== '' && v !== null && k !== 'is_staff'),
+            Object.entries(userData).filter(([k, v]) => {
+              if (k === 'is_staff') return false;
+              const isRequired = ['password', 'email', 'username'].includes(k);
+              return isRequired ? v !== '' && v != null : v != null;
+            }),
           );
           return await authService.updateMe(cleanData, { signal });
         } catch (error) {

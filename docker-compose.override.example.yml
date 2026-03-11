@@ -1,4 +1,20 @@
 services:
+  traefik:
+    command:
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--log.level=INFO"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=${ENABLE_SSL:-false}"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "8080:8080"
+
   redis:
     ports:
       - "6379:6379"
@@ -15,5 +31,15 @@ services:
       - PYTHONDONTWRITEBYTECODE=1
 
   frontend:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`${SITE_DOMAIN}`) || Host(`${SITE_IP}`)"
+      - "traefik.http.routers.frontend.entrypoints=${TRAEFIK_ENTRYPOINT}"
+      - "traefik.http.routers.frontend.tls=${ENABLE_SSL:-false}"
+      - "traefik.http.routers.frontend.tls.certresolver=myresolver"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.frontend-http.rule=Host(`${SITE_DOMAIN}`)"
+      - "traefik.http.routers.frontend-http.entrypoints=web"
+      - "traefik.http.routers.frontend-http.middlewares=${ENABLE_SSL:+redirect-to-https@docker}"
     volumes:
       - ./backend/protected_media:/usr/share/nginx/html/protected:ro

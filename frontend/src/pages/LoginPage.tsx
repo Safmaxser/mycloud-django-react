@@ -59,32 +59,37 @@ export function LoginPage() {
   }, [dispatch]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="rounded-4xl flex w-full max-w-lg flex-col bg-white p-8 shadow-2xl">
+    <div className="flex h-dvh items-center justify-center overflow-hidden bg-gray-50 px-4">
+      <div className="rounded-4xl flex w-full max-w-lg flex-col gap-8 bg-white p-8 shadow-2xl landscape:max-w-xl landscape:gap-4 landscape:p-6 landscape:lg:max-w-lg landscape:lg:gap-8 landscape:lg:p-8">
         <BackButton />
         <AuthHeader
           icon={Lock}
           title="Вход в MyCloud"
           subtitle="Введите данные для доступа к файлам"
         />
-        <form onSubmit={handleFormAction} className="space-y-6">
-          <FormInput
-            label="Имя пользователя"
-            icon={UserIcon}
-            autoComplete="username"
-            placeholder="ivan_cloud"
-            error={errors.username?.message}
-            {...register('username')}
-          />
-          <FormInput
-            label="Пароль"
-            icon={Lock}
-            type="password"
-            autoComplete="current-password"
-            placeholder="••••••••"
-            error={errors.password?.message}
-            {...register('password')}
-          />
+        <form
+          onSubmit={handleFormAction}
+          className="flex flex-col gap-6 landscape:gap-2 landscape:lg:gap-6"
+        >
+          <div className="flex flex-col gap-4 landscape:flex-row landscape:lg:flex-col">
+            <FormInput
+              label="Имя пользователя"
+              icon={UserIcon}
+              autoComplete="username"
+              placeholder="ivan_cloud"
+              error={errors.username?.message}
+              {...register('username')}
+            />
+            <FormInput
+              label="Пароль"
+              icon={Lock}
+              type="password"
+              autoComplete="current-password"
+              placeholder="••••••••"
+              error={errors.password?.message}
+              {...register('password')}
+            />
+          </div>
           {error && (
             <div className="rounded-md border border-red-100 bg-red-50 p-3 text-sm text-red-700">
               {error}
@@ -92,7 +97,7 @@ export function LoginPage() {
           )}
           <ButtonStandard label="Войти" loading={isSubmitting} className="mt-2 w-full" />
         </form>
-        <div className="mt-6 text-center text-sm">
+        <div className="text-center text-sm">
           <span className="text-gray-500">Нет аккаунта? </span>
           <Link
             to={ROUTES.REGISTER}

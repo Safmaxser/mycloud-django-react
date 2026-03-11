@@ -11,7 +11,7 @@ interface FileCellStatsProps {
 export function FileCellStats({ file }: FileCellStatsProps) {
   return (
     <div className="col-table">
-      <div className="inline-flex flex-col items-start">
+      <div className="inline-flex flex-col items-end lg:items-start">
         <div className="flex items-center gap-1.5 text-sm font-bold text-gray-700">
           <FileDown className="h-3.5 w-3.5 text-blue-300" />
           <span>{file.download_count}</span>

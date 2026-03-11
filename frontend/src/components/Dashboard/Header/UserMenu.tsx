@@ -16,10 +16,10 @@ export function UserMenu() {
     <div className="flex items-center gap-4">
       <button
         onClick={() => setIsProfileOpen(true)}
-        className="group flex cursor-pointer items-center gap-2 rounded-xl border border-none bg-blue-50 px-4 py-1 transition-all hover:bg-blue-100 hover:shadow-sm hover:shadow-blue-500/50"
+        className="group flex cursor-pointer items-center gap-2 rounded-xl border border-none px-1 py-1 transition-all hover:shadow-sm hover:shadow-blue-500/50 lg:bg-blue-50 lg:px-4 lg:hover:bg-blue-100"
       >
         <div className="flex items-center gap-2">
-          <div className="hidden flex-col gap-1 text-right sm:flex">
+          <div className="hidden flex-col gap-1 text-right lg:flex">
             <p className="whitespace-nowrap text-sm font-bold leading-none text-gray-900">
               {userName}
             </p>

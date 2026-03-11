@@ -78,6 +78,9 @@ export const fileService = {
         }
       },
     });
+    if (!response.data || response.data.size === 0) {
+      throw new Error('Файл пуст или поврежден.');
+    }
     const contentType = response.headers['content-type'] || 'application/pdf';
     const blob = new Blob([response.data], { type: contentType });
     return window.URL.createObjectURL(blob);

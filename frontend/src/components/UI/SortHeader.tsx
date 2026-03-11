@@ -37,7 +37,7 @@ export function SortHeader({ label, field, currentOrdering, onSort, className }:
     return (
       <div
         className={cn(
-          'col-table-title group flex select-none items-center justify-center py-4 transition-colors',
+          'col-table-title group select-none items-center justify-center py-4 transition-colors',
           className,
         )}
       >
@@ -51,7 +51,7 @@ export function SortHeader({ label, field, currentOrdering, onSort, className }:
       type="button"
       onClick={handleToggle}
       className={cn(
-        'col-table-title group flex cursor-pointer select-none items-center justify-center gap-1.5 py-4 transition-colors',
+        'col-table-title group cursor-pointer select-none items-center justify-center gap-1.5 py-4 transition-colors',
         isActive ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900',
         className,
       )}

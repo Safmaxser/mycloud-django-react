@@ -15,13 +15,13 @@ export function DangerZone({ onDelete, title, description, buttonText }: DangerZ
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="mt-6 border-t border-red-50 pt-3">
+    <div className="border-t border-red-50">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="group flex w-full cursor-pointer items-center justify-between py-2 transition-all"
       >
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 group-hover:text-red-400">
+        <span className="text-[0.7rem] font-black uppercase tracking-[0.2em] text-gray-400 group-hover:text-red-400">
           Управление аккаунтом
         </span>
         <ChevronDown
@@ -41,15 +41,24 @@ export function DangerZone({ onDelete, title, description, buttonText }: DangerZ
               </div>
               <div className="flex-1">
                 <h4 className="text-sm font-black text-red-600">{title}</h4>
-                <p className="mt-1 text-[11px] leading-relaxed text-red-400/80">{description}</p>
+                <p className="mt-1 text-[0.7rem] leading-relaxed text-red-400/80 landscape:text-[0.5rem] landscape:lg:text-[0.7rem]">
+                  {description}
+                </p>
                 <button
                   type="button"
                   onClick={onDelete}
-                  className="mt-6 cursor-pointer text-[10px] font-black uppercase tracking-widest text-red-500 underline-offset-8 hover:text-red-700 hover:underline"
+                  className="mt-6 block cursor-pointer text-[0.7rem] font-black uppercase tracking-widest text-red-500 underline-offset-8 hover:text-red-700 hover:underline landscape:hidden landscape:lg:block"
                 >
                   {buttonText}
                 </button>
               </div>
+              <button
+                type="button"
+                onClick={onDelete}
+                className="block cursor-pointer self-center text-[0.7rem] font-black uppercase tracking-widest text-red-500 underline-offset-8 hover:text-red-700 hover:underline portrait:hidden landscape:block landscape:lg:hidden"
+              >
+                Удалить
+              </button>
             </div>
           </div>
         </div>

@@ -16,6 +16,8 @@ docker-compose.override.example.yml
 **/.env
 **/.env.*
 !.env.example
+letsencrypt/acme.json
+letsencrypt/*.json
 
 # --- Backend (Django / Python / uv) ---
 **/__pycache__/

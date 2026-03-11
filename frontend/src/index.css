@@ -8,27 +8,27 @@
  * Обеспечивает пропорциональное изменение интерфейса на разных разрешениях.
  */
 :root {
-  font-size: 16px;
+  font-size: 8px;
 }
 
-@media (min-width: 1920px) {
+@media (min-width: 768px) {
   :root {
-    font-size: 18px;
+    font-size: 10px;
   }
 }
-@media (max-width: 1440px) {
-  :root {
-    font-size: 15px;
-  }
-}
-@media (max-width: 1024px) {
-  :root {
-    font-size: 13px;
-  }
-}
-@media (max-width: 768px) {
+@media (min-width: 1024px) {
   :root {
     font-size: 12px;
+  }
+}
+@media (min-width: 1440px) {
+  :root {
+    font-size: 14px;
+  }
+}
+@media (min-width: 1920px) {
+  :root {
+    font-size: 16px;
   }
 }
 
@@ -61,31 +61,72 @@
 
   /* Элементы управления и навигация */
   .btn-file-control {
-    @apply cursor-pointer rounded-lg p-2 text-gray-400 transition-all hover:bg-white hover:shadow-sm;
+    @apply cursor-pointer rounded-lg p-2 transition-all hover:bg-white hover:shadow-sm lg:text-gray-400;
   }
   .btn-non-priority {
     @apply cursor-pointer px-8 py-4 text-center text-sm font-bold text-gray-400 transition-colors hover:text-gray-700;
   }
   .btn-sidebar {
-    @apply flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2 font-medium transition-colors;
+    @apply flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl px-3 py-2 font-medium transition-colors lg:justify-start;
   }
   .link-standard {
-    @apply mb-6 flex cursor-pointer items-center gap-2 text-sm text-gray-500 transition-colors hover:text-blue-600;
+    @apply flex cursor-pointer items-center gap-2 text-sm text-gray-500 transition-colors hover:text-blue-600;
   }
 
   /* Сетка таблиц данных (Data Tables Layout) */
   .row-files-table {
-    @apply grid grid-cols-[minmax(200px,4fr)_1fr_1fr_1fr_1fr_1fr] gap-4 rounded-2xl border-b px-6;
+    @apply grid grid-cols-6 gap-1 rounded-2xl border-b px-4 py-2 lg:grid-cols-[minmax(200px,4fr)_1fr_1.5fr_1.5fr_1fr_2fr] lg:gap-4 lg:px-6;
+    & > *:first-child {
+      @apply col-span-4 lg:col-span-1;
+    }
+    & > *:nth-child(2) {
+      @apply col-span-2 justify-end lg:col-span-1 lg:justify-center;
+    }
+    & > *:nth-child(n + 3) {
+      @apply col-span-3 lg:col-span-1;
+    }
+    & > *:nth-child(odd) {
+      @apply justify-start lg:justify-center;
+    }
+    & > *:nth-child(even) {
+      @apply justify-end lg:justify-center;
+    }
+  }
+  .row-files-title {
+    @apply grid grid-cols-1 gap-4 rounded-2xl border-b px-6 lg:grid-cols-[minmax(200px,4fr)_1fr_1.5fr_1.5fr_1fr_2fr];
+    & > *:first-child {
+      @apply flex;
+    }
+    & > *:not(:first-child) {
+      @apply hidden lg:flex;
+    }
   }
   .row-users-table {
-    @apply grid grid-cols-[minmax(200px,1fr)_1fr_1fr_1fr_1fr_1fr] items-center gap-4 rounded-2xl border-b px-6;
+    @apply grid grid-cols-6 gap-1 rounded-2xl border-b px-4 py-2 lg:grid-cols-[minmax(200px,1fr)_1fr_1fr_1fr_1fr_1.5fr] lg:gap-4 lg:px-6;
+    & > *:nth-child(odd) {
+      @apply justify-start lg:justify-center;
+    }
+    & > *:nth-child(even) {
+      @apply justify-end lg:justify-center;
+    }
+    & > * {
+      @apply col-span-3 lg:col-span-1;
+    }
   }
-
+  .row-users-title {
+    @apply grid grid-cols-1 gap-4 rounded-2xl border-b px-6 lg:grid-cols-[minmax(200px,1fr)_1fr_1fr_1fr_1fr_1.5fr];
+    & > *:first-child {
+      @apply flex;
+    }
+    & > *:not(:first-child) {
+      @apply hidden lg:flex;
+    }
+  }
   .col-table-title {
     @apply text-center text-xs font-bold uppercase tracking-wider text-gray-500;
   }
   .col-table {
-    @apply flex items-center justify-center whitespace-nowrap py-4;
+    @apply flex items-center justify-center whitespace-nowrap py-0 lg:py-4;
   }
 }
 

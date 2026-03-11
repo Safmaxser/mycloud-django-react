@@ -29,8 +29,7 @@ class TestSettingsLogic:
 
     def test_debug_mode_disabled(self, monkeypatch):
         """
-        Branch Coverage: проверка ветки False для условия if DEBUG.
-        Покрывает: пропуск добавления debug_toolbar в APPS и MIDDLEWARE.
+        Проверка ветки False для условия if DEBUG.
         """
         # 1. Принудительно ставим False в окружении
         monkeypatch.setenv('DEBUG', 'False')
@@ -46,7 +45,7 @@ class TestSettingsLogic:
 
     def test_file_serve_method_validation_logic(self, monkeypatch):
         """
-        Branch Coverage: проверка получения значения и отката на django.
+        Проверка получения значения и отката на django.
         """
         import importlib
 
@@ -108,6 +107,23 @@ class TestSettingsLogic:
             sys.argv = original_argv
             sys.modules.update(original_modules)
             importlib.reload(importlib.import_module('core.settings'))
+
+    def test_site_protocol_https(self, monkeypatch):
+        """
+        Проверка установки заголовков для HTTPS.
+        """
+        monkeypatch.setenv('SITE_PROTOCOL', 'https')
+
+        # Локальный импорт и принудительная перезагрузка модуля
+        from core import settings as core_settings
+
+        importlib.reload(core_settings)
+
+        assert core_settings.SECURE_PROXY_SSL_HEADER == (
+            'HTTP_X_FORWARDED_PROTO',
+            'https',
+        )
+        assert core_settings.USE_X_FORWARDED_HOST is True
 
     @pytest.fixture(autouse=True)
     def reset_settings(self):

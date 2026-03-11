@@ -153,7 +153,11 @@ export const adminSlice = createAppSlice({
       async ({ id, userData }, { rejectWithValue }) => {
         try {
           const cleanData = Object.fromEntries(
-            Object.entries(userData).filter(([k, v]) => v !== '' && v !== null && k !== 'password'),
+            Object.entries(userData).filter(([k, v]) => {
+              if (k === 'password') return false;
+              const isRequired = ['email', 'username'].includes(k);
+              return isRequired ? v !== '' && v != null : v != null;
+            }),
           );
           return await adminService.updateUser(id, cleanData);
         } catch (error) {

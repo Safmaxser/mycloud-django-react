@@ -26,11 +26,14 @@ export function UploadConfirmModal({
   onClose,
 }: UploadConfirmModalProps) {
   return (
-    <BaseModal onClose={onClose}>
-      <div className="mb-6 flex items-center justify-between">
+    <BaseModal
+      className="max-w-lg gap-6 p-8 landscape:max-w-3xl landscape:gap-4 landscape:p-6 landscape:lg:max-w-lg landscape:lg:gap-6 landscape:lg:p-8"
+      onClose={onClose}
+    >
+      <div className="flex items-center justify-between">
         <h3 className="text-xl font-black tracking-tight text-gray-700">Подтверждение</h3>
       </div>
-      <div className="mb-6 flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+      <div className="flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
         <div className="rounded-lg bg-blue-100 p-2 text-blue-600">
           <FileIcon className="h-5 w-5" />
         </div>
@@ -41,7 +44,7 @@ export function UploadConfirmModal({
           </span>
         </div>
       </div>
-      <div className="mb-8 text-gray-900">
+      <div className="text-gray-900">
         <FormTextArea
           autoFocus
           label="Комментарий"
@@ -50,14 +53,15 @@ export function UploadConfirmModal({
           placeholder="Добавьте описание..."
         />
       </div>
-      <div className="flex flex-col gap-3">
+      <div className="flex w-full flex-col gap-2 landscape:flex-row landscape:lg:flex-col">
         <ButtonStandard
+          className="w-full"
           onClick={onConfirm}
           icon={Upload}
           label="Начать загрузку"
           classNameIcon="transition-transform group-hover:-translate-y-0.5"
         />
-        <button onClick={onClose} className="btn-non-priority">
+        <button onClick={onClose} className="btn-non-priority w-full">
           Отмена
         </button>
       </div>

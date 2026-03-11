@@ -2,6 +2,8 @@
 **/.env
 **/.env.local
 **/.env.*.local
+letsencrypt/acme.json
+letsencrypt/*.json
 
 # --- Backend (Django / Python) ---
 **/__pycache__/

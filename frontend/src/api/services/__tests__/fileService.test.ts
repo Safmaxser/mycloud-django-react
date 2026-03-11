@@ -153,7 +153,7 @@ describe('fileService', () => {
     });
 
     it('should calculate progress and cap it at 100%', async () => {
-      vi.mocked(apiClient.get).mockResolvedValue({ data: new Blob(['']), headers: {} });
+      vi.mocked(apiClient.get).mockResolvedValue({ data: new Blob(['test']), headers: {} });
       const onProgress = vi.fn();
       await fileService.getPreview('123', onProgress);
       const [, config] = vi.mocked(apiClient.get).mock.calls[0] as [string, AxiosRequestConfig];
@@ -165,7 +165,7 @@ describe('fileService', () => {
     });
 
     it('should ignore progress if total size is missing', async () => {
-      vi.mocked(apiClient.get).mockResolvedValue({ data: new Blob(['']), headers: {} });
+      vi.mocked(apiClient.get).mockResolvedValue({ data: new Blob(['test']), headers: {} });
       const onProgress = vi.fn();
       await fileService.getPreview('123', onProgress);
       const [, config] = vi.mocked(apiClient.get).mock.calls[0] as [string, AxiosRequestConfig];
@@ -175,7 +175,7 @@ describe('fileService', () => {
     });
 
     it('should handle call without onProgress callback', async () => {
-      vi.mocked(apiClient.get).mockResolvedValue({ data: new Blob(['']), headers: {} });
+      vi.mocked(apiClient.get).mockResolvedValue({ data: new Blob(['test']), headers: {} });
       await fileService.getPreview('123');
       const [, config] = vi.mocked(apiClient.get).mock.calls[0] as [string, AxiosRequestConfig];
       expect(config.onDownloadProgress).toBeInstanceOf(Function);
@@ -196,6 +196,11 @@ describe('fileService', () => {
         expect.objectContaining({ type: 'application/pdf' }),
       );
       blobSpy.mockRestore();
+    });
+
+    it('should throw error if response data is missing', async () => {
+      vi.mocked(apiClient.get).mockResolvedValue({ data: null, headers: {} });
+      await expect(fileService.getPreview(fileId)).rejects.toThrow('Файл пуст или поврежден.');
     });
   });
 

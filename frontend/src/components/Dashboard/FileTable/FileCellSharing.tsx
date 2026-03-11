@@ -46,7 +46,7 @@ export function FileCellSharing({ file }: FileCellSharingProps) {
           </button>
         </div>
       ) : (
-        <div className="justify-center text-center text-[10px] font-bold uppercase tracking-widest text-gray-300">
+        <div className="justify-center text-center text-[0.7rem] font-bold uppercase tracking-widest text-gray-300">
           Приватный
         </div>
       )}

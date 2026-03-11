@@ -55,39 +55,46 @@ export function RegisterPage() {
   }, []);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
-      <div className="rounded-4xl flex w-full max-w-lg flex-col bg-white p-8 shadow-2xl">
+    <div className="flex h-dvh items-center justify-center overflow-hidden bg-gray-50 px-4 py-12">
+      <div className="rounded-4xl flex w-full max-w-lg flex-col gap-8 bg-white p-8 shadow-2xl landscape:max-w-3xl landscape:gap-4 landscape:p-6 landscape:lg:max-w-lg landscape:lg:gap-8 landscape:lg:p-8">
         <BackButton />
         <AuthHeader
           icon={UserPlus}
           title="Создать аккаунт"
           subtitle="Зарегистрируйтесь в MyCloud для хранения файлов"
         />
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <FormInput
-            label="Логин (4-20 символов, латиница)"
-            icon={UserIcon}
-            placeholder="ivan_cloud"
-            error={errors.username?.message}
-            {...register('username')}
-          />
-          <FormInput
-            label="Электронная почта"
-            icon={Mail}
-            type="email"
-            placeholder="example@mail.com"
-            error={errors.email?.message}
-            {...register('email')}
-          />
-          <FormInput
-            label="Имя и Фамилия"
-            icon={IdCard}
-            placeholder="Иван Иванов"
-            error={errors.full_name?.message}
-            {...register('full_name')}
-          />
-          <div className="flex gap-2">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col gap-6 landscape:gap-2 landscape:lg:gap-6"
+        >
+          <div className="grid grid-cols-2 gap-4 lg:gap-6 landscape:grid-cols-4 landscape:lg:grid-cols-2">
             <FormInput
+              classNameBlock="col-span-2"
+              label="Логин (4-20 символов, латиница)"
+              icon={UserIcon}
+              placeholder="ivan_cloud"
+              error={errors.username?.message}
+              {...register('username')}
+            />
+            <FormInput
+              classNameBlock="col-span-2"
+              label="Электронная почта"
+              icon={Mail}
+              type="email"
+              placeholder="example@mail.com"
+              error={errors.email?.message}
+              {...register('email')}
+            />
+            <FormInput
+              classNameBlock="col-span-2"
+              label="Имя и Фамилия"
+              icon={IdCard}
+              placeholder="Иван Иванов"
+              error={errors.full_name?.message}
+              {...register('full_name')}
+            />
+            <FormInput
+              classNameBlock="col-span-1"
               label="Пароль"
               icon={Lock}
               type="password"
@@ -97,6 +104,7 @@ export function RegisterPage() {
               {...register('password')}
             />
             <FormInput
+              classNameBlock="col-span-1"
               label="Повторите пароль"
               icon={Lock}
               type="password"

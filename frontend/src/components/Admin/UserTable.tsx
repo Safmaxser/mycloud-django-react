@@ -29,7 +29,7 @@ export function UserTable({ users }: UserTableProps) {
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white font-sans text-gray-900 shadow-sm">
-      <div className="row-users-table sticky top-0 z-10 rounded-2xl border-b border-gray-100 bg-gray-50/80 backdrop-blur-md">
+      <div className="row-users-title sticky top-0 z-10 rounded-2xl border-b border-gray-100 bg-gray-50/80 backdrop-blur-md">
         {USER_TABLE_COLUMNS.map((col) => (
           <SortHeader
             key={col.label}
